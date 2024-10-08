@@ -5,10 +5,9 @@ Tool for exact comparison two Parquet files.
     - [Removing noise](#removing-noise)
     - [Removing same recors](#removing-same-recors)
     - [Detailed Analyses](#detailed-analyses)
-- [Building the project](#building-the-project)
-- [How to run](#how-to-run)
-    - [Requirements](#requirements)
-- [How to run tests](#how-to-run-tests)
+- [Project structure](#project-structure)
+    - [bigfiles](#bigfiles)
+    - [smallfiles](#smallfiles)
 <!-- tocstop -->
 
 ## What is CPS Dataset Comparison?
@@ -37,16 +36,13 @@ We have decided to use row by row comparison for detailed analyses. We can use m
 
 
 > All charts could be seen on [this Miro board](https://miro.com/app/board/uXjVLaOagec=/?share_link_id=579669188211)
-## Building the project
-## How to run
-This will run code in Main:
-`sbt run` 
-### Requirements
-- scala 2.12
-- spark 3.5.3
-- java 17
-## How to run tests
-
-| sbt command | test type | info                                   |
-| ----------- |-----------|----------------------------------------|
-| `sbt test`  | ...       | It will run tests in test/scala folder |
+## Project structure
+Project is divided into two modules:
+### bigfiles
+- module for comparing big files
+- written in Scala
+- more about bigfiles module could be found in [bigfiles README](bigfiles/README.md)
+### smallfiles
+- module for comparing small files
+- written in Python
+- more about smallfiles module could be found in [smallfiles README](smallfiles/README.md)

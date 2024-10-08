@@ -17,3 +17,6 @@ test-output
 build.log
 
 .bsp
+
+# small files
+venv

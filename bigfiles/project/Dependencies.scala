@@ -1,3 +1,5 @@
+import sbt.ModuleID
+
 object Dependencies {
 
   object Versions {
