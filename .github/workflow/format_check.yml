@@ -1,9 +1,9 @@
 name: Format Check
 
 on:
+  push:
+    branches: [ "master" ]
   pull_request:
-    branches: [ master ]
-    types: [ assigned, opened, synchronize ]
 
 jobs:
   scala-format-check:

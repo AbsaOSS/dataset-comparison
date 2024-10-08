@@ -1,10 +1,9 @@
 name: Build and test
 
 on:
+  push:
+    branches: [ "master" ]
   pull_request:
-    branches:
-      - '**'
-    types: [ opened, synchronize, reopened ]
 
 jobs:
   test-agent-reader-and-model:
