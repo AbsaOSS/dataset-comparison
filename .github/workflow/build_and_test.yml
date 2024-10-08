@@ -1,0 +1,26 @@
+name: Build and test
+
+on:
+  pull_request:
+    branches:
+      - '**'
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  test-agent-reader-and-model:
+    name: Test Agent, Reader and Model
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: coursier/cache-action@v5
+
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v14
+        with:
+          java-version: "adopt@1.8"
+
+      - name: Build and run tests
+        run: sbt test
