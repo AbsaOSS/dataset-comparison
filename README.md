@@ -39,12 +39,14 @@ We have decided to use row by row comparison for detailed analyses. We can use m
 > All charts could be seen on [this Miro board](https://miro.com/app/board/uXjVLaOagec=/?share_link_id=579669188211)
 ## Building the project
 ## How to run
+This will run code in Main:
+`sbt run` 
 ### Requirements
 - scala 2.12
-- spark 3.4
+- spark 3.5.3
 - java 17
 ## How to run tests
 
-| sbt command | test type | info |
-| ----------- | --------- | ---- |
-| `sbt test`  | ...       | ...  |
+| sbt command | test type | info                                   |
+| ----------- |-----------|----------------------------------------|
+| `sbt test`  | ...       | It will run tests in test/scala folder |

@@ -1,0 +1,19 @@
+# idea
+.idea
+*.iml
+logs
+
+# vs code
+.vscode
+
+# building
+target
+build
+null
+tmp*
+temp*
+dist
+test-output
+build.log
+
+.bsp
