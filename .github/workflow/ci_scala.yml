@@ -1,0 +1,71 @@
+name: CI Scala
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bigfiles
+    strategy:
+      matrix:
+        include:
+          - scala: 2.12.17
+            scalaShort: "2.12"
+            overall: 0.0
+            changed: 80.0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+      - name: Build and run tests
+        run: sbt ++${{matrix.scala}} jacoco
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.3
+        with:
+          paths: ${{ github.workspace }}/target/scala-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: ${{ matrix.overall }}
+          min-coverage-changed-files: ${{ matrix.changed }}
+          title: JaCoCo code coverage report - scala ${{ matrix.scala }}
+          update-comment: true
+      - name: Get the Coverage info
+        run: |
+          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
+      - name: Fail PR if changed files coverage is less than ${{ matrix.changed }}%
+        if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Changed files coverage is less than ${{ matrix.changed }}%!')
+
+
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bigfiles
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+
+      - name: Run scalafmt And Print Diff
+        continue-on-error: true
+        run: sbt scalafmt scalafmtSbt && git diff --exit-code

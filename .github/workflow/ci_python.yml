@@ -1,0 +1,95 @@
+name: CI Python
+
+on:
+  pull_request:
+
+jobs:
+  test-smallfiles:
+    name: Test Small files
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: smallfiles
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install coverage pytest
+
+      - name: Run tests
+        run: coverage run --source='smallfiles' -m pytest test/
+
+      - name: Show coverage
+        run: coverage report -m --omit=".*.ipynb"
+
+      - name: Create coverage file
+        if: github.event_name == 'pull_request'
+        run: coverage xml
+
+      - name: Get Cover
+        if: github.event_name == 'pull_request'
+        uses: orgoro/coverage@v3.1
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: 0.7
+          thresholdNew: 0.9
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: coverage
+          path: coverage.xml
+          retention-days: 1
+
+  python-format-check:
+    name: Python Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install black
+
+      - name: Check code format with Black
+        run: |
+          black --check $(git ls-files '*.py')
+
+
+  python-static-analysis:
+    name: Python Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install pylint
+
+      - name: Analysing the code with pylint
+        run: |
+          pylint $(git ls-files '*.py')
