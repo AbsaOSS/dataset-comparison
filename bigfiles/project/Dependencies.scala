@@ -18,11 +18,9 @@ object Dependencies {
     lazy val sparkCore = "org.apache.spark" %% "spark-core" % Versions.spark3 % Provided
     lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Versions.spark3 % Provided
 
-    lazy val scalastic = "org.scalactic" %% "scalactic" % Versions.scalastic
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
 
     Seq(
-      scalastic,
       scalatest,
       fansi,
       sparkCore,

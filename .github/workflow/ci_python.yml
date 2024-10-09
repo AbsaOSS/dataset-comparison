@@ -50,6 +50,7 @@ jobs:
           name: coverage
           path: coverage.xml
           retention-days: 1
+
   python-format-check:
     name: Python Format Check
     runs-on: ubuntu-latest
