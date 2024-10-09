@@ -6,8 +6,8 @@ on:
   pull_request:
 
 jobs:
-  test-agent-reader-and-model:
-    name: Test Agent, Reader and Model
+  test-bigfiles:
+    name: Test Big files
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,4 +22,108 @@ jobs:
           java-version: "adopt@1.8"
 
       - name: Build and run tests
-        run: sbt test
+        run: cd bigfiles && sbt test
+
+  scala-format-check:
+    name: Scala Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+
+      - name: Run scalafmt And Print Diff
+        continue-on-error: true
+        run: cd bigfiles && sbt scalafmt scalafmtSbt && git diff --exit-code
+  test-smallfiles:
+    name: Test Small files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+            python-version: '3.11'
+            cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+            pip install -r requirements.txt
+            pip install coverage pytest
+
+      - name: Run tests
+        run: cd smallfiles && coverage run --source='smallfiles' -m pytest test/
+
+      - name: Show coverage
+        run: cd smallfiles && coverage report -m --omit=".*.ipynb"
+
+      - name: Create coverage file
+        if: github.event_name == 'pull_request'
+        run: cd smallfiles && coverage xml
+
+      - name: Get Cover
+        if: github.event_name == 'pull_request'
+        uses: orgoro/coverage@v3.1
+        with:
+          coverageFile: smallfiles/coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: 0.7
+          thresholdNew: 0.9
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: coverage
+          path: smallfiles/coverage.xml
+          retention-days: 1
+  python-format-check:
+    name: Python Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install black
+
+      - name: Check code format with Black
+        run: |
+          black --check $(git ls-files '*.py')
+
+
+  python-static-analysis:
+    name: Python Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install pylint
+
+      - name: Analysing the code with pylint
+        run: |
+          pylint $(git ls-files '*.py')

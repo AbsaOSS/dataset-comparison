@@ -6,11 +6,6 @@ This is scala implementation of the project. It is used for comparing big files.
 - [How to run tests](#how-to-run-tests)
 
 ## How to run
-> You have to be in bigfiles folder
-
-```bash
-cd bigfiles
-```
 
 This will run code in Main:
 `sbt run`
@@ -19,7 +14,6 @@ This will run code in Main:
 - spark 3.5.3
 - java 17
 ## How to run tests
-You have to be in bigfiles folder
 ```bash
 cd bigfiles
 ```

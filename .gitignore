@@ -20,3 +20,6 @@ build.log
 
 # small files
 venv
+.coverage
+.DS_Store
+__pycache__
