@@ -1,50 +1,15 @@
-name: Build and test
+name: CI Python
 
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
 
 jobs:
-  test-bigfiles:
-    name: Test Big files
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: coursier/cache-action@v5
-
-      - name: Setup Scala
-        uses: olafurpg/setup-scala@v14
-        with:
-          java-version: "adopt@1.8"
-
-      - name: Build and run tests
-        run: cd bigfiles && sbt test
-
-  scala-format-check:
-    name: Scala Format Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
-        with:
-          java-version: "adopt@1.8"
-
-      - name: Run scalafmt And Print Diff
-        continue-on-error: true
-        run: cd bigfiles && sbt scalafmt scalafmtSbt && git diff --exit-code
   test-smallfiles:
     name: Test Small files
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: smallfiles
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,29 +17,29 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-            python-version: '3.11'
-            cache: 'pip'
+          python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
-            pip install -r requirements.txt
-            pip install coverage pytest
+          pip install -r requirements.txt
+          pip install coverage pytest
 
       - name: Run tests
-        run: cd smallfiles && coverage run --source='smallfiles' -m pytest test/
+        run: coverage run --source='smallfiles' -m pytest test/
 
       - name: Show coverage
-        run: cd smallfiles && coverage report -m --omit=".*.ipynb"
+        run: coverage report -m --omit=".*.ipynb"
 
       - name: Create coverage file
         if: github.event_name == 'pull_request'
-        run: cd smallfiles && coverage xml
+        run: coverage xml
 
       - name: Get Cover
         if: github.event_name == 'pull_request'
         uses: orgoro/coverage@v3.1
         with:
-          coverageFile: smallfiles/coverage.xml
+          coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           thresholdAll: 0.7
           thresholdNew: 0.9
@@ -83,7 +48,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           name: coverage
-          path: smallfiles/coverage.xml
+          path: coverage.xml
           retention-days: 1
   python-format-check:
     name: Python Format Check
