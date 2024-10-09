@@ -7,5 +7,7 @@ ThisBuild / organization := "africa.absa.cps"
 lazy val root = (project in file("."))
   .settings(
     name := "dataset-comparison",
-    libraryDependencies ++= bigfilesDependencies
+    assembly / mainClass := Some("africa.absa.cps.Main"),
+    libraryDependencies ++= bigfilesDependencies,
+
   )
