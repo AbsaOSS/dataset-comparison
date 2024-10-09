@@ -9,7 +9,6 @@ object Main{
     // Initialize Spark session
     val spark = SparkSession.builder()
       .appName("SimpleSparkApp")
-      .master("local[*]")
       .getOrCreate()
 
     import spark.implicits._
