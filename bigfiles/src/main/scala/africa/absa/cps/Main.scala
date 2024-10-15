@@ -2,14 +2,14 @@ package africa.absa.cps
 
 import org.apache.spark.sql.SparkSession
 import hash.HashTable
-import readers.FileSystemReader
-import africa.absa.cps.writers.FileSystemWriter
+import readers.SparkReader
+import africa.absa.cps.writers.SparkWriter
 
 import scala.util.matching.Regex
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val (oldFilename, newFilename) = readArgs(args)
+    val (oldFilename, newFilename, outputPath) = readArgs(args)
 
     val spark = SparkSession.builder()
       .appName("SimpleSparkApp")
@@ -18,15 +18,15 @@ object Main {
 
     import spark.implicits._
 
-    compare(oldFilename, newFilename, spark)
+    compare(oldFilename, newFilename, outputPath, spark)
   }
 
-  private def readArgs(args: Array[String]): (String, String) = {
-    if (args.length < 2) {
-      println("Usage: App <old_parquet_file> <new_parquet_file>")
+  private def readArgs(args: Array[String]): (String, String, String) = {
+    if (args.length < 3) {
+      println("Usage: App <old_parquet_path> <new_parquet_path> <output_path>")
       System.exit(1)
     }
-    (args(0),  args(1))
+    (args(0),  args(1), args(2))
   }
   private def extract(valueString: String): String = {
     val valueMatch: Regex = """\/(?!.*\/).*\.parquet""".r
@@ -37,11 +37,10 @@ object Main {
     }
   }
 
-  private def compare(oldFilename: String, newFilename: String, spark: SparkSession): Unit = {
-    // todo more then one file
+  private def compare(oldFilename: String, newFilename: String, outputPath: String, spark: SparkSession): Unit = {
     // read files
-    val dataOld = FileSystemReader.read(oldFilename, spark).files(0)
-    val dataNew = FileSystemReader.read(newFilename, spark).files(0)
+    val dataOld = SparkReader.read(oldFilename, spark)
+    val dataNew = SparkReader.read(newFilename, spark)
 
     // compute hash rows
     val oldWithHash = HashTable.hash(dataOld)
@@ -56,8 +55,8 @@ object Main {
     val newUniq = newWithHash.join(newUniqHash, Seq("hash"))
 
     // write to file
-    FileSystemWriter.write(extract(oldFilename), oldUniq)
-    FileSystemWriter.write(extract(newFilename), newUniq)
+    SparkWriter.write(outputPath + "/Diff_" + extract(oldFilename), oldUniq)
+    SparkWriter.write(outputPath + "/Diff_" + extract(newFilename), newUniq)
 
     // show different rows
     println("Different rows: ")

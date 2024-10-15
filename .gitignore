@@ -18,6 +18,9 @@ build.log
 
 .bsp
 
+# big files
+resources
+
 # small files
 venv
 .coverage
