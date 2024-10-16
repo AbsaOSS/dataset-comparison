@@ -11,12 +11,14 @@ object Dependencies {
     val scalastic = "3.0.0"
     val scalaMockito = "1.17.37"
     val scalaLangJava8Compat = "1.0.2"
+    val json = "3.6.6"
   }
 
   def bigfilesDependencies: Seq[ModuleID] = {
     lazy val fansi = "com.lihaoyi" %% "fansi" % Versions.fansi
     lazy val sparkCore = "org.apache.spark" %% "spark-core" % Versions.spark3 % Provided
     lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Versions.spark3 % Provided
+    lazy val json = "org.json4s" %% "json4s-native" % Versions.json
 
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
 
@@ -24,7 +26,8 @@ object Dependencies {
       scalatest,
       fansi,
       sparkCore,
-      sparkSql
+      sparkSql,
+      json
     )
   }
 }

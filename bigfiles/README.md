@@ -13,7 +13,7 @@ First run assembly: `sbt assembly`
 Then run:
 
 ```bash
-spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar
+spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar <old-file-path> <new-file-path> <output-path>
 ```
 
 ### Requirements
@@ -21,7 +21,8 @@ spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar
 - scala 2.12
 - spark 3.5.3
 - java 17
-
+- 
+more requirements are in [Dependency](project/Dependencies.scala) file
 ## How to run tests
 
 
