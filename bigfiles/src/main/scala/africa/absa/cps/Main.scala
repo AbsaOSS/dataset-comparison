@@ -1,7 +1,7 @@
 package africa.absa.cps
 
-import org.apache.spark.sql.{DataFrame, SparkSession}
-
+import africa.absa.cps.parser.ArgsParser
+import org.apache.spark.sql.SparkSession
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -16,13 +16,18 @@ object Main {
     Comparator.compare(oldFilename, newFilename, outputPath, spark)
   }
 
+  /**
+   * Read the arguments from the command line by using the ArgsParser
+   * @param args arguments from the command line
+   * @return a tuple containing the old file path, the new file path and the output path
+   */
   private def readArgs(args: Array[String]): (String, String, String) = {
-    if (args.length < 3) {
-      println("Usage: App <old_parquet_path> <new_parquet_path> <output_path>")
+    val result = ArgsParser.getArgs(args)
+    if (result.isEmpty) {
       System.exit(1)
     }
-    (args(0),  args(1), args(2))
-  }
+    result.get
 
+  }
 }
 

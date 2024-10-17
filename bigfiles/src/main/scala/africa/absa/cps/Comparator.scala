@@ -11,8 +11,16 @@ import scala.util.matching.Regex
 
 import org.json4s.JsonDSL._
 
-
+/**
+ * Comparator object that compares two parquet files and writes the differences to a folder
+ */
 object Comparator {
+  /**
+   * Extract the name of the file from the path
+   *
+   * @param valueString path to file
+   * @return name of the file
+   */
   private def extractName(valueString: String): String = {
     val valueMatch: Regex = """\/(?!.*\/).*\.parquet""".r
 
@@ -21,6 +29,15 @@ object Comparator {
       case None => "Unnamed"
     }
   }
+  /**
+   * Create metrics and write them to a file
+   *
+   * @param outputPath path to output folder
+   * @param oldData old DataFrame whole data
+   * @param newData new DataFrame whole data
+   * @param oldUniq only unique rows in old DataFrame
+   * @param newUniq only unique rows in new DataFrame
+   */
   private def createMetrics(outputPath: String,
                             oldData: DataFrame, newData: DataFrame,
                             oldUniq: DataFrame, newUniq: DataFrame): Unit = {
@@ -48,12 +65,20 @@ object Comparator {
     Files.write(outputFilePath, jsonString.getBytes)
   }
 
+  /**
+   * Compare two parquet files and write the differences and metrics to a folder
+   *
+   * @param oldFilename path to old parquet file to compare
+   * @param newFilename path to new parquet file to compare
+   * @param outputPath to output folder
+   * @param spark SparkSession
+   */
   def compare(oldFilename: String, newFilename: String, outputPath: String, spark: SparkSession): Unit = {
     // read files
     val oldData: DataFrame = SparkReader.read(oldFilename, spark)
     val newData: DataFrame = SparkReader.read(newFilename, spark)
 
-    // preprocess data todo
+    // preprocess data todo will be solved by issue #5
 
     // compute hash rows
     val oldWithHash: DataFrame = HashTable.hash(oldData)
@@ -67,13 +92,13 @@ object Comparator {
     val oldUniq: DataFrame = oldWithHash.join(oldUniqHash, Seq("hash"))
     val newUniq: DataFrame = newWithHash.join(newUniqHash, Seq("hash"))
 
-    // compute diff todo
+    // compute diff todo will be solved by issue #3
 
     // write unique rows to file
     SparkWriter.write(outputPath + "/Diff_" + extractName(oldFilename), oldUniq)
     SparkWriter.write(outputPath + "/Diff_" + extractName(newFilename), newUniq)
 
-    // write diff todo
+    // write diff todo will be solved by issue #3
 
     // create and write metrics
     createMetrics(outputPath, oldData, newData, oldUniq, newUniq)
