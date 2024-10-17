@@ -32,10 +32,11 @@ jobs:
         run: sbt jacoco
 
       - name: Add coverage to PR
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.3
+        if: steps.jacocorun.outcome == 'success'
+        id: jacoco-coverage
+        uses: madrapps/jacoco-report@v1.7.1
         with:
-          paths: ${{ github.workspace }}/target/scala-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml
+          paths: ${{ github.workspace }}/target/jvm-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: ${{ matrix.overall }}
           min-coverage-changed-files: ${{ matrix.changed }}
