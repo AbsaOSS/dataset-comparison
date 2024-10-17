@@ -33,11 +33,7 @@ jobs:
 
       - name: Create coverage file
         if: github.event_name == 'pull_request'
-        run: |
-          coverage xml
-          pwd
-          ls -l
-          cat coverage.xml
+        run: coverage xml
 
       - name: Get Cover
         if: github.event_name == 'pull_request'
