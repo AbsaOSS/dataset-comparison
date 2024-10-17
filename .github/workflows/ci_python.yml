@@ -73,9 +73,13 @@ jobs:
           black --check $(git ls-files '*.py')
 
 
+
   python-static-analysis:
     name: Python Static Analysis
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: smallfiles
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -88,6 +92,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install -r requirements.txt
           pip install pylint
 
       - name: Analysing the code with pylint
