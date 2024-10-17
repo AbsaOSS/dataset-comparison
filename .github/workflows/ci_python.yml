@@ -43,7 +43,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: orgoro/coverage@v3.1
         with:
-          coverageFile: coverage.xml
+          coverageFile: smallfiles/coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           thresholdAll: 0.7
           thresholdNew: 0.9
