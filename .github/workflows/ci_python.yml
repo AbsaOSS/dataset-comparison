@@ -37,6 +37,7 @@ jobs:
           coverage xml
           pwd
           ls -l
+          cat coverage.xml
 
       - name: Get Cover
         if: github.event_name == 'pull_request'
