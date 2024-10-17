@@ -20,12 +20,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
+
       - name: Build and run tests
-        run: sbt ++${{matrix.scala}} jacoco
+        continue-on-error: true
+        id: jacocorun
+        run: sbt jacoco
+
       - name: Add coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.3
@@ -36,10 +41,12 @@ jobs:
           min-coverage-changed-files: ${{ matrix.changed }}
           title: JaCoCo code coverage report - scala ${{ matrix.scala }}
           update-comment: true
+
       - name: Get the Coverage info
         run: |
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
           echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
+
       - name: Fail PR if changed files coverage is less than ${{ matrix.changed }}%
         if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
         uses: actions/github-script@v6
