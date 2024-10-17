@@ -13,4 +13,3 @@ lazy val root = (project in file("."))
     Test / baseDirectory := (ThisBuild / baseDirectory).value
   )
 
-jacoco.settings
