@@ -9,5 +9,6 @@ lazy val root = (project in file("."))
     name := "dataset-comparison",
     assembly / mainClass := Some("africa.absa.cps.Main"),
     libraryDependencies ++= bigfilesDependencies,
-
+    Test / fork := true,
+    Test / baseDirectory := (ThisBuild / baseDirectory).value
   )
