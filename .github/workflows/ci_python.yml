@@ -26,7 +26,7 @@ jobs:
           pip install coverage pytest
 
       - name: Run tests
-        run: coverage run --source='smallfiles' -m pytest test/
+        run: coverage run -m pytest test/
 
       - name: Show coverage
         run: coverage report -m --omit=".*.ipynb"
