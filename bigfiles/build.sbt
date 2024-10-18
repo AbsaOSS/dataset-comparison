@@ -13,3 +13,9 @@ lazy val root = (project in file("."))
     Test / baseDirectory := (ThisBuild / baseDirectory).value
   )
 
+// JaCoCo code coverage
+Test / jacocoReportSettings := JacocoReportSettings(
+  title = s"{project} Jacoco Report - scala:${scalaVersion.value}",
+  formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
+)
+
