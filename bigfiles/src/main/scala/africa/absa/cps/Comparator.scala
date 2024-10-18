@@ -95,8 +95,8 @@ object Comparator {
     // compute diff todo will be solved by issue #3
 
     // write unique rows to file
-    SparkWriter.write(outputPath + "/Diff_" + extractName(oldFilename), oldUniq)
-    SparkWriter.write(outputPath + "/Diff_" + extractName(newFilename), newUniq)
+    SparkWriter.write(outputPath + "/Diff_" + extractName(oldFilename) + "01", oldUniq)
+    SparkWriter.write(outputPath + "/Diff_" + extractName(newFilename) + "02", newUniq)
 
     // write diff todo will be solved by issue #3
 

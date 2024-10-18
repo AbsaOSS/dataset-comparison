@@ -2,7 +2,7 @@ import africa.absa.cps.hash.HashTable
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 
-class HashTableTest  extends AnyFunSuite{
+class HashTableTest extends AnyFunSuite{
   val spark: SparkSession = SparkTestSession.spark
 
   import spark.implicits._
