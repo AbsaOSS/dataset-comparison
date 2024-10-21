@@ -19,3 +19,7 @@ Test / jacocoReportSettings := JacocoReportSettings(
   formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
 )
 
+Test / jacocoExcludes := Seq(
+  "africa.absa.cps.Main",
+)
+

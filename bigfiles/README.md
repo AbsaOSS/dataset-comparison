@@ -13,7 +13,7 @@ First run assembly: `sbt assembly`
 Then run:
 
 ```bash
-spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar <old-file-path> <new-file-path> <output-path>
+spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> <A-file-path> <B-file-path> 
 ```
 
 ### Requirements
