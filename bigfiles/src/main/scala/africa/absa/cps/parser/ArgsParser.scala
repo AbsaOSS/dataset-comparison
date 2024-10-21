@@ -21,17 +21,31 @@ object ArgsParser {
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(out = x))
-          .text("output path"),
+          .text("output path to directory")
+          .validate(x =>
+            if (x.isDirectory)
+              success
+            else if (x.isFile)
+              failure(s"Output ${x.getAbsolutePath} is a file")
+            else
+              failure(s"Output ${x.getAbsolutePath} does not exist")
+          ),
         arg[File]("inputA") // path to first input
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(inputA = x))
-          .text("inputA paths to compare"),
+          .text("inputA paths to compare")
+          .validate(x =>
+            if (x.exists())  success else failure(s"Input ${x.getAbsolutePath} does not exist")
+          ),
         arg[File]("inputB") // path to second input
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(inputB = x))
-          .text("inputB paths to compare"),
+          .text("inputB paths to compare")
+          .validate(x =>
+            if (x.exists()) success else failure(s"Input ${x.getAbsolutePath} does not exist")
+          )
       )
     }
 

@@ -1,4 +1,4 @@
-import africa.absa.cps.readers.SparkReader
+import africa.absa.cps.io.SparkReader
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
