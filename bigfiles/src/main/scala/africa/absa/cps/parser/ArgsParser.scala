@@ -5,8 +5,13 @@ import scopt.OParser
 import java.io.File
 
 object ArgsParser {
-  def getArgs(args: Array[String]): Option[(String, String, String)] = {
-    val builder = OParser.builder[Config]
+  /**
+   * Read the arguments from the command line by using the scopt library
+   * @param args arguments from the command line
+   * @return Config class containing the arguments
+   */
+  def getArgs(args: Array[String]): Arguments = {
+    val builder = OParser.builder[Arguments]
     val parser1 = {
       import builder._
       OParser.sequence(
@@ -17,19 +22,23 @@ object ArgsParser {
           .valueName("<file>")
           .action((x, c) => c.copy(out = x))
           .text("output path"),
-        arg[File]("<file>...") // two files for comparison
+        arg[File]("inputA") // path to first input
           .required()
-          .minOccurs(2)
-          .maxOccurs(2)
-          .action((x, c) => c.copy(files = c.files :+ x))
-          .text("2 input files paths to compare"),
+          .valueName("<file>")
+          .action((x, c) => c.copy(inputA = x))
+          .text("inputA paths to compare"),
+        arg[File]("inputB") // path to second input
+          .required()
+          .valueName("<file>")
+          .action((x, c) => c.copy(inputB = x))
+          .text("inputB paths to compare"),
       )
     }
 
     // match the arguments with the parser
-    OParser.parse(parser1, args, Config()) match {
-      case Some(config) => Some((config.files.head.toString, config.files(1).toString, config.out.toString))
-      case _ => None
+    OParser.parse(parser1, args, Arguments()) match {
+      case Some(config) => config
+      case _ => throw new IllegalArgumentException("Invalid arguments")
     }
   }
 }

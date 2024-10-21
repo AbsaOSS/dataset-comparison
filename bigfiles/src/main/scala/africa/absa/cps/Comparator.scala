@@ -33,31 +33,31 @@ object Comparator {
    * Create metrics and write them to a file
    *
    * @param outputPath path to output folder
-   * @param oldData old DataFrame whole data
-   * @param newData new DataFrame whole data
-   * @param oldUniq only unique rows in old DataFrame
-   * @param newUniq only unique rows in new DataFrame
+   * @param dataA A DataFrame whole data
+   * @param dataB B DataFrame whole data
+   * @param uniqA only unique rows in A DataFrame
+   * @param uniqB only unique rows in B DataFrame
    */
   private def createMetrics(outputPath: String,
-                            oldData: DataFrame, newData: DataFrame,
-                            oldUniq: DataFrame, newUniq: DataFrame): Unit = {
+                            dataA: DataFrame, dataB: DataFrame,
+                            uniqA: DataFrame, uniqB: DataFrame): Unit = {
     // compute metrics
-    val oldRowCount = oldData.count()
-    val newRowCount = newData.count()
-    val sameRecords = if (oldRowCount - oldUniq.count() == newRowCount - newUniq.count()) oldRowCount - oldUniq.count() else -1
+    val rowCountA = dataA.count()
+    val rowCountB = dataB.count()
+    val sameRecords = if (rowCountA - uniqA.count() == rowCountB - uniqB.count()) rowCountA - uniqA.count() else -1
 
     val metricsJson =
-      ("old" ->
-        ("row count" -> oldRowCount) ~
-        ("column count" -> oldData.columns.length) ~
-        ("diff column count" -> oldUniq.count())) ~
-      ("new" ->
-          ("row count" -> newRowCount) ~
-          ("column count" -> oldData.columns.length) ~
-          ("diff column count" -> newUniq.count())) ~
+      ("A" ->
+        ("row count" -> rowCountA) ~
+        ("column count" -> dataA.columns.length) ~
+        ("diff column count" -> uniqA.count())) ~
+      ("B" ->
+          ("row count" -> rowCountB) ~
+          ("column count" -> dataA.columns.length) ~
+          ("diff column count" -> uniqB.count())) ~
       ("general" ->
           ("same records count" -> sameRecords) ~
-          ("same records percent" -> (math floor (sameRecords.toFloat/oldRowCount)*10000)/100))
+          ("same records percent" -> (math floor (sameRecords.toFloat/rowCountA)*10000)/100))
 
     val jsonString = compact(render(metricsJson))
     // write metrics
@@ -68,45 +68,42 @@ object Comparator {
   /**
    * Compare two parquet files and write the differences and metrics to a folder
    *
-   * @param oldFilename path to old parquet file to compare
-   * @param newFilename path to new parquet file to compare
+   * @param dataA dataframe from input A
+   * @param dataB dataframe from input B
    * @param outputPath to output folder
    * @param spark SparkSession
    */
-  def compare(oldFilename: String, newFilename: String, outputPath: String, spark: SparkSession): Unit = {
-    // read files
-    val oldData: DataFrame = SparkReader.read(oldFilename, spark)
-    val newData: DataFrame = SparkReader.read(newFilename, spark)
+  def compare(dataA: DataFrame, dataB: DataFrame, outputPath: String, spark: SparkSession): Unit = {
 
     // preprocess data todo will be solved by issue #5
 
     // compute hash rows
-    val oldWithHash: DataFrame = HashTable.hash(oldData)
-    val newWithHash: DataFrame = HashTable.hash(newData)
+    val dfWithHashA: DataFrame = HashTable.hash(dataA)
+    val dfWithHashB: DataFrame = HashTable.hash(dataB)
 
     // select non matching hashs
-    val oldUniqHash: DataFrame = oldWithHash.select("hash").exceptAll(newWithHash.select("hash"))
-    val newUniqHash: DataFrame = newWithHash.select("hash").exceptAll(oldWithHash.select("hash"))
+    val uniqHashA: DataFrame = dfWithHashA.select(Main.HashName).exceptAll(dfWithHashB.select(Main.HashName))
+    val uniqHashB: DataFrame = dfWithHashB.select(Main.HashName).exceptAll(dfWithHashA.select(Main.HashName))
 
     // join on hash column (get back whole rows)
-    val oldUniq: DataFrame = oldWithHash.join(oldUniqHash, Seq("hash"))
-    val newUniq: DataFrame = newWithHash.join(newUniqHash, Seq("hash"))
+    val uniqA: DataFrame = dfWithHashA.join(uniqHashA, Seq(Main.HashName))
+    val uniqB: DataFrame = dfWithHashB.join(uniqHashB, Seq(Main.HashName))
 
     // compute diff todo will be solved by issue #3
 
     // write unique rows to file
-    SparkWriter.write(outputPath + "/Diff_" + extractName(oldFilename) + "01", oldUniq)
-    SparkWriter.write(outputPath + "/Diff_" + extractName(newFilename) + "02", newUniq)
+    SparkWriter.write(outputPath + "/Diff_" + extractName(filenameA) + "01", uniqA)
+    SparkWriter.write(outputPath + "/Diff_" + extractName(filenameB) + "02", uniqB)
 
     // write diff todo will be solved by issue #3
 
     // create and write metrics
-    createMetrics(outputPath, oldData, newData, oldUniq, newUniq)
+    createMetrics(outputPath, dataA, dataB, uniqA, uniqB)
 
     // show different rows
     println("Different rows: ")
-    oldUniq.show(numRows = 5, truncate = false)
-    newUniq.show(numRows = 5, truncate = false)
+    uniqA.show(numRows = 5, truncate = false)
+    uniqB.show(numRows = 5, truncate = false)
   }
 
 }
