@@ -85,7 +85,7 @@ object Comparator {
 
     logger.info("Getting diff rows for B")
     val distinctDiffB: DataFrame = diffHashB.join(dfWithHashB, Seq(HashName)).distinct()
-    val diffB: DataFrame = diffHashB.join(distinctDiffB, Seq(HashName)).distinct()
+    val diffB: DataFrame = diffHashB.join(distinctDiffB, Seq(HashName))
 
     (diffA, diffB)
   }
