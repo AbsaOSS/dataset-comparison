@@ -21,31 +21,17 @@ object ArgsParser {
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(out = x))
-          .text("output path to directory")
-          .validate(x =>
-            if (x.isDirectory)
-              success
-            else if (x.isFile)
-              failure(s"Output ${x.getAbsolutePath} is a file")
-            else
-              failure(s"Output ${x.getAbsolutePath} does not exist")
-          ),
-        arg[File]("inputA") // path to first input
+          .text("output path to directory"),
+        opt[File]("inputA") // path to first input
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(inputA = x))
-          .text("inputA paths to compare")
-          .validate(x =>
-            if (x.exists())  success else failure(s"Input ${x.getAbsolutePath} does not exist")
-          ),
-        arg[File]("inputB") // path to second input
+          .text("inputA paths to compare"),
+        opt[File]("inputB") // path to second input
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(inputB = x))
           .text("inputB paths to compare")
-          .validate(x =>
-            if (x.exists()) success else failure(s"Input ${x.getAbsolutePath} does not exist")
-          )
       )
     }
 
@@ -54,5 +40,18 @@ object ArgsParser {
       case Some(config) => config
       case _ => throw new IllegalArgumentException("Invalid arguments")
     }
+  }
+
+  /**
+   * Validate the arguments
+   * @param args arguments to validate
+   * @return true if the arguments are valid
+   */
+  def validate(args: Arguments): Boolean = {
+    if (!args.inputA.exists()) throw new IllegalArgumentException(s"Input ${args.inputA.getAbsolutePath} does not exist")
+    if (!args.inputB.exists()) throw new IllegalArgumentException(s"Input ${args.inputB.getAbsolutePath} does not exist")
+    if (!args.out.exists()) throw new IllegalArgumentException(s"Output ${args.out.getAbsolutePath} does not exist")
+    if (!args.out.isDirectory) throw new IllegalArgumentException(s"Output ${args.out.getAbsolutePath} is a file")
+    true
   }
 }

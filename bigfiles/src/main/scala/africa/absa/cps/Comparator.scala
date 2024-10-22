@@ -1,43 +1,52 @@
 package africa.absa.cps
 
-import hash.HashDataFrame
+import hash.HashUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.json4s.native.JsonMethods.{compact, render}
-
 import org.json4s.JsonDSL._
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
  * Comparator object that compares two parquet files and creates metrics
  */
 object Comparator {
 
+  val HashName = "cps_comparison_hash"
+  private val logger: Logger = LoggerFactory.getLogger(Comparator.getClass)
+
   /**
    * Create metrics
    *
    * @param dataA A DataFrame whole data
    * @param dataB B DataFrame whole data
-   * @param uniqA only unique rows in A DataFrame
-   * @param uniqB only unique rows in B DataFrame
+   * @param diffA only diff rows in A DataFrame
+   * @param diffB only diff rows in B DataFrame
    * @return JSON string with metrics
    */
-  def createMetrics(dataA: DataFrame, dataB: DataFrame, uniqA: DataFrame, uniqB: DataFrame): String = {
+  def createMetrics(dataA: DataFrame, dataB: DataFrame, diffA: DataFrame, diffB: DataFrame): String = {
+
+    logger.info("Computing metrics")
 
     // compute metrics
     val rowCountA = dataA.count()
     val rowCountB = dataB.count()
-    val uniqCountA = uniqA.count()
-    val uniqCountB = uniqB.count()
-    val sameRecords = if (rowCountA - uniqCountA == rowCountB - uniqCountB) rowCountA - uniqCountA else -1
+    val uniqRowCountA = dataA.distinct().count()
+    val uniqRowCountB = dataB.distinct().count()
+    val diffCountA = diffA.count()
+    val diffCountB = diffB.count()
+    val sameRecords = if (rowCountA - diffCountA == rowCountB - diffCountB) rowCountA - diffCountA else -1
 
     val metricsJson =
       ("A" ->
         ("row count" -> rowCountA) ~
         ("column count" -> dataA.columns.length) ~
-        ("diff column count" -> uniqCountA)) ~
+        ("rows not present in B" -> diffCountA)) ~
+        ("unique rows count" -> uniqRowCountA) ~
       ("B" ->
           ("row count" -> rowCountB) ~
           ("column count" -> dataB.columns.length) ~
-          ("diff column count" -> uniqCountB)) ~
+          ("rows not present in A" -> diffCountB)) ~
+          ("unique rows count" -> uniqRowCountB) ~
       ("general" ->
           ("same records count" -> sameRecords) ~
           ("same records percent" -> (math floor (sameRecords.toFloat/rowCountA)*10000)/100))
@@ -46,31 +55,36 @@ object Comparator {
   }
 
   /**
-   * Compare two parquet files and return unique rows
+   * Compare two parquet files and return diff rows
    *
    * @param dataA dataframe from input A
    * @param dataB dataframe from input B
-   * @param outputPath to output folder
    * @param spark SparkSession
-   * @return two DataFrames with unique rows
+   * @return two DataFrames with diff rows
    */
-  def compare(dataA: DataFrame, dataB: DataFrame, outputPath: String)(implicit spark: SparkSession): (DataFrame, DataFrame) = {
+  def compare(dataA: DataFrame, dataB: DataFrame)(implicit spark: SparkSession): (DataFrame, DataFrame) = {
 
     // preprocess data todo will be solved by issue #5
 
     // compute hash rows
-    val dfWithHashA: DataFrame = HashDataFrame.hash(dataA)
-    val dfWithHashB: DataFrame = HashDataFrame.hash(dataB)
+    val dfWithHashA: DataFrame = HashUtils.createHashColumn(dataA)
+    logger.info("Hash for A created")
+    val dfWithHashB: DataFrame = HashUtils.createHashColumn(dataB)
+    logger.info("Hash for B created")
 
     // select non matching hashs
-    val uniqHashA: DataFrame = dfWithHashA.select(Main.HashName).exceptAll(dfWithHashB.select(Main.HashName))
-    val uniqHashB: DataFrame = dfWithHashB.select(Main.HashName).exceptAll(dfWithHashA.select(Main.HashName))
+    logger.info("Getting diff hashes, A except B")
+    val diffHashA: DataFrame = dfWithHashA.select(HashName).exceptAll(dfWithHashB.select(HashName))
+    logger.info("Getting diff hashes, B except A")
+    val diffHashB: DataFrame = dfWithHashB.select(HashName).exceptAll(dfWithHashA.select(HashName))
 
     // join on hash column (get back whole rows)
-    val uniqA: DataFrame = dfWithHashA.join(uniqHashA, Seq(Main.HashName))
-    val uniqB: DataFrame = dfWithHashB.join(uniqHashB, Seq(Main.HashName))
+    logger.info("Getting diff rows for A")
+    val diffA: DataFrame = dfWithHashA.join(diffHashA, Seq(HashName))
+    logger.info("Getting diff rows for B")
+    val diffB: DataFrame = dfWithHashB.join(diffHashB, Seq(HashName))
 
-    (uniqA, uniqB)
+    (diffA, diffB)
   }
 
 }

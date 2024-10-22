@@ -31,7 +31,6 @@ object Dependencies {
       json,
       scopt,
       slf4jApi,
-//      slf4Simple
     )
   }
 }
