@@ -20,6 +20,6 @@ Test / jacocoReportSettings := JacocoReportSettings(
 )
 
 Test / jacocoExcludes := Seq(
-  "africa.absa.cps.Main",
+  "africa.absa.cps.Main*",
 )
 

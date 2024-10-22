@@ -19,7 +19,10 @@ build.log
 .bsp
 
 # big files
-resources
+bigfiles/src/main/resources/saved
+bigfiles/src/main/resources/HadoopExport*
+bigfiles/src/main/resources/savedmetrics.json
+
 
 # small files
 venv

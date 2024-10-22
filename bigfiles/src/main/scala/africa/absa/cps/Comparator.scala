@@ -49,7 +49,7 @@ object Comparator {
           ("unique rows count" -> uniqRowCountB) ~
       ("general" ->
           ("same records count" -> sameRecords) ~
-          ("same records percent" -> (math floor (sameRecords.toFloat/rowCountA)*10000)/100))
+          ("same records percent to A" -> (math floor (sameRecords.toFloat/rowCountA)*10000)/100))
 
     compact(render(metricsJson))
   }
@@ -80,9 +80,12 @@ object Comparator {
 
     // join on hash column (get back whole rows)
     logger.info("Getting diff rows for A")
-    val diffA: DataFrame = dfWithHashA.join(diffHashA, Seq(HashName))
+    val distinctDiffA: DataFrame = diffHashA.join(dfWithHashA, Seq(HashName)).distinct()
+    val diffA: DataFrame = diffHashA.join(distinctDiffA, Seq(HashName))
+
     logger.info("Getting diff rows for B")
-    val diffB: DataFrame = dfWithHashB.join(diffHashB, Seq(HashName))
+    val distinctDiffB: DataFrame = diffHashB.join(dfWithHashB, Seq(HashName)).distinct()
+    val diffB: DataFrame = diffHashB.join(distinctDiffB, Seq(HashName)).distinct()
 
     (diffA, diffB)
   }

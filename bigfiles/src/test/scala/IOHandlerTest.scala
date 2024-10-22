@@ -1,16 +1,15 @@
 import africa.absa.cps.io.IOHandler
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.json4s.native.JsonMethods.{compact, render}
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-
 import org.json4s.JsonDSL._
 
 import java.io.File
 import scala.reflect.io.Directory
 
-class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
+class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter{
 
   implicit val spark: SparkSession = SparkTestSession.spark
 
@@ -18,7 +17,8 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
 
   val filePath = "src/test/resources/sample.parquet"
 
-  override def afterAll(): Unit = {
+
+  after {
     // Clean up
     new Directory(new File(filePath)).deleteRecursively()
   }
@@ -30,7 +30,8 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
     val df: DataFrame = IOHandler.sparkRead(filePath)
 
     assert(df != null)
-    assert(df.count() > 0)
+    assert(df.count() == 2)
+    assert(df.columns === Array("id", "value"))
   }
 
   test("test that dfWrite write a DataFrame to a Parquet file") {
@@ -39,12 +40,13 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
     IOHandler.dfWrite(filePath, df)
 
     val writtenDf: DataFrame = spark.read.parquet(filePath)
+    assert(writtenDf != null)
     assert(writtenDf.count() === 2)
     assert(writtenDf.columns === Array("id", "value"))
 
   }
 
-  test("test that dfWrite write a DataFrame to a Parquet file") {
+  test("test that jsonWrite write a DataFrame to a Parquet file") {
     val metricsJson =
       ("A" ->
         ("row count" -> 100) ~
@@ -60,7 +62,7 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
 
     IOHandler.jsonWrite(filePath, compact(render(metricsJson)))
 
-    val source = scala.io.Source.fromFile("file.txt")
+    val source = scala.io.Source.fromFile(filePath)
     val lines = try source.mkString finally source.close()
     assert(lines === compact(render(metricsJson)))
   }
