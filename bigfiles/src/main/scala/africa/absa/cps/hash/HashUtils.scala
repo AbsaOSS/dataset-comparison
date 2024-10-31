@@ -1,12 +1,13 @@
 package africa.absa.cps.hash
 
-import africa.absa.cps.{Comparator, Main}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.{col, struct, udf}
 import org.slf4j.{Logger, LoggerFactory}
 
 object HashUtils {
+
+  val HASH_COLUMN_NAME = "cps_comparison_hash"
 
   private val logger: Logger = LoggerFactory.getLogger(HashUtils.getClass)
   private val hashUDF = udf((row: Row) => hashRow(row))
@@ -27,7 +28,7 @@ object HashUtils {
    */
   def createHashColumn(df: DataFrame): DataFrame = {
     logger.info("Hashing the dataframe")
-    df.withColumn(Comparator.HashName , hashUDF(struct(df.columns.map(col): _*)))
+    df.withColumn(HASH_COLUMN_NAME , hashUDF(struct(df.columns.map(col): _*)))
   }
 
 }

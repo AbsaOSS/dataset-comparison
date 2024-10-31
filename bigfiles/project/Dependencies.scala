@@ -12,6 +12,7 @@ object Dependencies {
     val scopt = "4.1.0"
     val slf4jApi = "2.0.16"
     val logback = "1.2.3"
+    val hadoop = "3.3.5"
   }
   def bigfilesDependencies: Seq[ModuleID] = {
     lazy val fansi = "com.lihaoyi" %% "fansi" % Versions.fansi
@@ -19,7 +20,10 @@ object Dependencies {
     lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Versions.spark3 % Provided
     lazy val json = "org.json4s" %% "json4s-native" % Versions.json
     lazy val scopt = "com.github.scopt" %% "scopt" % Versions.scopt
-    lazy val slf4jApi = "org.slf4j" % "slf4j-api" % Versions.slf4jApi
+    lazy val slf4jApi = "org.slf4j" % "slf4j-api" % Versions.slf4jApi exclude("log4j", "log4j")
+    lazy val hadoopCommon = "org.apache.hadoop" % "hadoop-common" % Versions.hadoop
+    lazy val hadoopClient = "org.apache.hadoop" % "hadoop-client" % Versions.hadoop
+    lazy val hdfs = "org.apache.hadoop" % "hadoop-hdfs" % Versions.hadoop
 
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
 
@@ -31,6 +35,9 @@ object Dependencies {
       json,
       scopt,
       slf4jApi,
+      hadoopCommon,
+      hadoopClient,
+      hdfs
     )
   }
 }

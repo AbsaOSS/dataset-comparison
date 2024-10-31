@@ -1,8 +1,14 @@
 package africa.absa.cps.parser
 
+import org.apache.hadoop.conf.Configuration
+
+import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.fs.Path
 import scopt.OParser
 
-import java.io.File
+import java.net.URI
+
+
 
 object ArgsParser {
   /**
@@ -17,21 +23,25 @@ object ArgsParser {
       OParser.sequence(
         programName("Dataset Comparison"),
         head("dataset-comparison", "0.x"),
-        opt[File]('o', "out") // output filepath
+        opt[String]('o', "out") // output filepath
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(out = x))
           .text("output path to directory"),
-        opt[File]("inputA") // path to first input
+        opt[String]("inputA") // path to first input
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(inputA = x))
           .text("inputA paths to compare"),
-        opt[File]("inputB") // path to second input
+        opt[String]("inputB") // path to second input
           .required()
           .valueName("<file>")
           .action((x, c) => c.copy(inputB = x))
-          .text("inputB paths to compare")
+          .text("inputB paths to compare"),
+        opt[String]("fsURI") // hdfs URI
+          .required()
+          .action((x, c) => c.copy(fsURI = x))
+          .text("file system URI")
       )
     }
 
@@ -42,16 +52,19 @@ object ArgsParser {
     }
   }
 
+
   /**
    * Validate the arguments
    * @param args arguments to validate
    * @return true if the arguments are valid
    */
   def validate(args: Arguments): Boolean = {
-    if (!args.inputA.exists()) throw new IllegalArgumentException(s"Input ${args.inputA.getAbsolutePath} does not exist")
-    if (!args.inputB.exists()) throw new IllegalArgumentException(s"Input ${args.inputB.getAbsolutePath} does not exist")
-    if (!args.out.exists()) throw new IllegalArgumentException(s"Output ${args.out.getAbsolutePath} does not exist")
-    if (!args.out.isDirectory) throw new IllegalArgumentException(s"Output ${args.out.getAbsolutePath} is a file")
+//    val fs = FileSystem.getLocal( new Configuration())
+//    fs.setWorkingDirectory(new Path(args.fsURI))
+    val fs = FileSystem.get(new URI(args.fsURI), new Configuration())
+    if (!fs.exists(new Path(args.inputA))) throw new IllegalArgumentException(s"Input ${args.inputA} does not exist")
+    if (!fs.exists(new Path(args.inputB))) throw new IllegalArgumentException(s"Input ${args.inputB} does not exist")
+    if (fs.exists(new Path(args.out))) throw new IllegalArgumentException(s"Output ${args.out} already exist")
     true
   }
 }

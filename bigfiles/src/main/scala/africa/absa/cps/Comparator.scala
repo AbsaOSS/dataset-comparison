@@ -1,5 +1,6 @@
 package africa.absa.cps
 
+import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
 import hash.HashUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.json4s.native.JsonMethods.{compact, render}
@@ -11,7 +12,6 @@ import org.slf4j.{Logger, LoggerFactory}
  */
 object Comparator {
 
-  val HashName = "cps_comparison_hash"
   private val logger: Logger = LoggerFactory.getLogger(Comparator.getClass)
 
   /**
@@ -74,18 +74,18 @@ object Comparator {
 
     // select non matching hashs
     logger.info("Getting diff hashes, A except B")
-    val diffHashA: DataFrame = dfWithHashA.select(HashName).exceptAll(dfWithHashB.select(HashName))
+    val diffHashA: DataFrame = dfWithHashA.select(HASH_COLUMN_NAME).exceptAll(dfWithHashB.select(HASH_COLUMN_NAME))
     logger.info("Getting diff hashes, B except A")
-    val diffHashB: DataFrame = dfWithHashB.select(HashName).exceptAll(dfWithHashA.select(HashName))
+    val diffHashB: DataFrame = dfWithHashB.select(HASH_COLUMN_NAME).exceptAll(dfWithHashA.select(HASH_COLUMN_NAME))
 
     // join on hash column (get back whole rows)
     logger.info("Getting diff rows for A")
-    val distinctDiffA: DataFrame = diffHashA.join(dfWithHashA, Seq(HashName)).distinct()
-    val diffA: DataFrame = diffHashA.join(distinctDiffA, Seq(HashName))
+    val distinctDiffA: DataFrame = diffHashA.join(dfWithHashA, Seq(HASH_COLUMN_NAME)).distinct()
+    val diffA: DataFrame = diffHashA.join(distinctDiffA, Seq(HASH_COLUMN_NAME))
 
     logger.info("Getting diff rows for B")
-    val distinctDiffB: DataFrame = diffHashB.join(dfWithHashB, Seq(HashName)).distinct()
-    val diffB: DataFrame = diffHashB.join(distinctDiffB, Seq(HashName))
+    val distinctDiffB: DataFrame = diffHashB.join(dfWithHashB, Seq(HASH_COLUMN_NAME)).distinct()
+    val diffB: DataFrame = diffHashB.join(distinctDiffB, Seq(HASH_COLUMN_NAME))
 
     (diffA, diffB)
   }

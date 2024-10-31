@@ -14,13 +14,15 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
   implicit val spark: SparkSession = SparkTestSession.spark
 
   import spark.implicits._
-
-  val filePath = "src/test/resources/sample.parquet"
+  val folder = "testoutput"
+  val filePath: String = folder + "/sample.parquet"
+  val jsonPath: String = folder +"/sample.json"
 
 
   after {
     // Clean up
-    new Directory(new File(filePath)).deleteRecursively()
+    val dir = new Directory(new File("src/test/resources/" + folder))
+    dir.deleteRecursively()
   }
 
   test("test that sparkRead reads a Parquet file into a DataFrame") {
@@ -60,11 +62,11 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
           ("same records count" -> 97) ~
           ("same records percent" -> (math floor (97.0/100)*10000)/100))
 
-    IOHandler.jsonWrite(filePath, compact(render(metricsJson)))
+    IOHandler.jsonWrite(jsonPath, compact(render(metricsJson)))
 
-    val source = scala.io.Source.fromFile(filePath)
-    val lines = try source.mkString finally source.close()
-    assert(lines === compact(render(metricsJson)))
+    val df = spark.read.json(jsonPath)
+    val lines = df.collect().mkString("\n")
+    assert(lines === compact(render(List(metricsJson))))
   }
 }
 

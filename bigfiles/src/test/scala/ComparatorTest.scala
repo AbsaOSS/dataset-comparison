@@ -1,9 +1,8 @@
 import africa.absa.cps.Comparator
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
-class ComparatorTest extends AnyFunSuite with BeforeAndAfterAll {
+class ComparatorTest extends AnyFunSuite {
   implicit val spark: SparkSession = SparkTestSession.spark
 
   import spark.implicits._

@@ -1,5 +1,8 @@
 package africa.absa.cps.io
 
+import org.apache.spark.sql.catalyst.dsl.expressions.StringToAttributeConversionHelper
+import org.apache.spark.sql.functions.from_json
+import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -37,10 +40,10 @@ object IOHandler{
    * @param filePath path to file
    * @param jsonString to write
    */
-  def jsonWrite(filePath: String, jsonString: String): Unit = {
+  def jsonWrite(filePath: String, jsonString: String)(implicit spark: SparkSession): Unit = {
     logger.info(s"Saving json data to $filePath")
-    val outputFilePath = Paths.get(filePath)
-    Files.write(outputFilePath, jsonString.getBytes)
+    import spark.implicits._
+    Seq(jsonString).toDS.write.json(filePath)
   }
 
 }
