@@ -1,0 +1,70 @@
+package africa.absa.cps.parser
+
+import org.apache.hadoop.conf.Configuration
+
+import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.fs.Path
+import scopt.OParser
+
+import java.net.URI
+
+
+
+object ArgsParser {
+  /**
+   * Read the arguments from the command line by using the scopt library
+   * @param args arguments from the command line
+   * @return Config class containing the arguments
+   */
+  def getArgs(args: Array[String]): Arguments = {
+    val builder = OParser.builder[Arguments]
+    val parser1 = {
+      import builder._
+      OParser.sequence(
+        programName("Dataset Comparison"),
+        head("dataset-comparison", "0.x"),
+        opt[String]('o', "out") // output filepath
+          .required()
+          .valueName("<file>")
+          .action((x, c) => c.copy(out = x))
+          .text("output path to directory"),
+        opt[String]("inputA") // path to first input
+          .required()
+          .valueName("<file>")
+          .action((x, c) => c.copy(inputA = x))
+          .text("inputA paths to compare"),
+        opt[String]("inputB") // path to second input
+          .required()
+          .valueName("<file>")
+          .action((x, c) => c.copy(inputB = x))
+          .text("inputB paths to compare"),
+        opt[String]("fsURI") // hdfs URI
+          .required()
+          .action((x, c) => c.copy(fsURI = x))
+          .text("file system URI")
+      )
+    }
+
+    // match the arguments with the parser
+    OParser.parse(parser1, args, Arguments()) match {
+      case Some(config) => config
+      case _ => throw new IllegalArgumentException("Invalid arguments")
+    }
+  }
+
+
+  /**
+   * Validate the arguments
+   * @param args arguments to validate
+   * @return true if the arguments are valid
+   */
+  def validate(args: Arguments): Boolean = {
+//    val fs = FileSystem.getLocal( new Configuration())
+//    fs.setWorkingDirectory(new Path(args.fsURI))
+    val fs = FileSystem.get(new URI(args.fsURI), new Configuration())
+    if (!fs.exists(new Path(args.inputA))) throw new IllegalArgumentException(s"Input ${args.inputA} does not exist")
+    if (!fs.exists(new Path(args.inputB))) throw new IllegalArgumentException(s"Input ${args.inputB} does not exist")
+    if (fs.exists(new Path(args.out))) throw new IllegalArgumentException(s"Output ${args.out} already exist")
+    true
+  }
+}
