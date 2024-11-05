@@ -1,8 +1,10 @@
 package africa.absa.cps
 
+import africa.absa.cps.analysis.RowByRowAnalysis
 import africa.absa.cps.parser.ArgsParser
 import africa.absa.cps.io.IOHandler
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.json4s.native.JsonMethods.{compact, parse, render}
 
 import java.nio.file.Paths
 
@@ -30,7 +32,8 @@ object DatasetComparison {
 
     val (uniqA, uniqB) = Comparator.compare(dataA, dataB)
 
-    // compute diff todo will be solved by issue #3
+    // compute diff
+    val diff = RowByRowAnalysis.analyse(dataA, dataB)
 
     val metrics: String = Comparator.createMetrics(dataA, dataB, uniqA, uniqB)
 
@@ -40,7 +43,9 @@ object DatasetComparison {
     IOHandler.dfWrite(Paths.get(out, "inputB_differences").toString, uniqB)
     IOHandler.jsonWrite(Paths.get(out, "metrics.json").toString, metrics)
 
-    // write diff todo will be solved by issue #3
+    // write diff
+    IOHandler.jsonWrite(Paths.get(out, "A_to_B_changes.json").toString, compact(render(parse(diff._1))))
+    IOHandler.jsonWrite(Paths.get(out, "B_to_A_changes.json").toString, compact(render(parse(diff._1))))
 
   }
 }
