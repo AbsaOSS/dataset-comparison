@@ -41,7 +41,11 @@ object ArgsParser {
         opt[String]("fsURI") // hdfs URI
           .required()
           .action((x, c) => c.copy(fsURI = x))
-          .text("file system URI")
+          .text("file system URI"),
+        opt[String]('d', "diff") // diff type
+          .optional()
+          .action((x, c) => c.copy(diff = DiffComputeType.withName(x)))
+          .text("Compute differences. You can chose from: (Row)")
       )
     }
 
@@ -59,8 +63,6 @@ object ArgsParser {
    * @return true if the arguments are valid
    */
   def validate(args: Arguments): Boolean = {
-//    val fs = FileSystem.getLocal( new Configuration())
-//    fs.setWorkingDirectory(new Path(args.fsURI))
     val fs = FileSystem.get(new URI(args.fsURI), new Configuration())
     if (!fs.exists(new Path(args.inputA))) throw new IllegalArgumentException(s"Input ${args.inputA} does not exist")
     if (!fs.exists(new Path(args.inputB))) throw new IllegalArgumentException(s"Input ${args.inputB} does not exist")

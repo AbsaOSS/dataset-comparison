@@ -1,4 +1,4 @@
-import africa.absa.cps.parser.{ArgsParser, Arguments}
+import africa.absa.cps.parser.{ArgsParser, Arguments, DiffComputeType}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.scalatest.BeforeAndAfterAll
@@ -61,6 +61,27 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
     assert(res.inputA == "file1")
     assert(res.inputB == "file2")
   }
+
+  test("test diff option will be set to Row if passed") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--fsURI", FS_URI, "--diff", "Row")
+    val res = ArgsParser.getArgs(args)
+    assert(res.diff == DiffComputeType.Row)
+
+    val args2 = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--fsURI", FS_URI, "-d", "Row")
+    val res2 = ArgsParser.getArgs(args2)
+    assert(res2.diff == DiffComputeType.Row)
+  }
+  test("test diff option will be set to None if diff option is not passed") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--fsURI", FS_URI)
+    val res = ArgsParser.getArgs(args)
+    assert(res.diff == DiffComputeType.None)
+  }
+
+  test("test that ArgParser will throw exception if diff option is not valid") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--fsURI", FS_URI, "-d", "NotValid")
+    assertThrows[IllegalArgumentException](ArgsParser.getArgs(args))
+  }
+
 
   ////////////////////////////////Validate//////////////////////////////////////////
 //  val HDFS_URI = "hdfs://localhost:9999/"
