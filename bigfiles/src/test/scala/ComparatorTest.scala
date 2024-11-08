@@ -80,16 +80,16 @@ class ComparatorTest extends AnyFunSuite {
     val tmp1: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (2, "three"), (3, "two")).toDF("id", "value")
     val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2)
+    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2, Seq())
     val expected = "{\"A\":{\"row count\":2," +
                       "\"column count\":2," +
-                      "\"rows not present in B\":1}," +
-                      "\"unique rows count\":2," +
+                      "\"rows not present in B\":1," +
+                      "\"unique rows count\":2}," +
                     "\"B\":{\"row count\":3," +
                       "\"column count\":2," +
-                      "\"rows not present in A\":2}," +
-                      "\"unique rows count\":3," +
-                    "\"general\":{\"same records count\":1,\"same records percent to A\":50.0}}"
+                      "\"rows not present in A\":2," +
+                      "\"unique rows count\":3}," +
+                    "\"general\":{\"same records count\":1,\"same records percent to A\":50.0,\"excluded columns\":\"\"}}"
     assert(metrics == expected)
   }
 
@@ -97,16 +97,33 @@ class ComparatorTest extends AnyFunSuite {
     val tmp1: DataFrame = Seq((1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
     val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2)
+    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2, Seq())
     val expected = "{\"A\":{\"row count\":3," +
       "\"column count\":2," +
-      "\"rows not present in B\":0}," +
-      "\"unique rows count\":2," +
+      "\"rows not present in B\":0," +
+      "\"unique rows count\":2}," +
       "\"B\":{\"row count\":4," +
       "\"column count\":2," +
-      "\"rows not present in A\":1}," +
-      "\"unique rows count\":2," +
-      "\"general\":{\"same records count\":3,\"same records percent to A\":100.0}}"
+      "\"rows not present in A\":1," +
+      "\"unique rows count\":2}," +
+      "\"general\":{\"same records count\":3,\"same records percent to A\":100.0,\"excluded columns\":\"\"}}"
+    assert(metrics == expected)
+  }
+
+  test("test that createMetrics returns correct JSON string with excluded columns"){
+    val tmp1: DataFrame = Seq(("one"), ("two")).toDF("value")
+    val tmp2: DataFrame = Seq(("one"), ("three"), ("two")).toDF("value")
+    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
+    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2, Seq("id"))
+    val expected = "{\"A\":{\"row count\":2," +
+      "\"column count\":1," +
+      "\"rows not present in B\":0," +
+      "\"unique rows count\":2}," +
+      "\"B\":{\"row count\":3," +
+      "\"column count\":1," +
+      "\"rows not present in A\":1," +
+      "\"unique rows count\":3}," +
+      "\"general\":{\"same records count\":2,\"same records percent to A\":100.0,\"excluded columns\":\"id\"}}"
     assert(metrics == expected)
   }
 }

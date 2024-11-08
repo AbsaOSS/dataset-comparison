@@ -62,6 +62,24 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
     assert(res.inputB == "file2")
   }
 
+  test("test that exclude option is correctly parsed") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--fsURI", FS_URI, "--exclude", "col1")
+    val res = ArgsParser.getArgs(args)
+    assert(res.exclude == Seq("col1"))
+  }
+
+  test("test that exclude option is correctly parsed with multiple columns") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--fsURI", FS_URI, "--exclude", "col1,col2,col3")
+    val res = ArgsParser.getArgs(args)
+    assert(res.exclude == Seq("col1", "col2", "col3"))
+  }
+
+  test("test that ArgParses has empty exclude if exclude is not passed") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--fsURI", FS_URI)
+    val res = ArgsParser.getArgs(args)
+    assert(res.exclude == Seq())
+  }
+
   ////////////////////////////////Validate//////////////////////////////////////////
 //  val HDFS_URI = "hdfs://localhost:9999/"
 //  override def beforeAll(): Unit = {

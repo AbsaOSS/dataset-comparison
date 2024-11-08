@@ -25,14 +25,14 @@ object DatasetComparison {
     import spark.implicits._
 
     // read data
-    val dataA: DataFrame = IOHandler.sparkRead(arguments.inputA)
-    val dataB: DataFrame = IOHandler.sparkRead(arguments.inputB)
+    val dataA: DataFrame = DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputA), arguments.exclude, "A")
+    val dataB: DataFrame = DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputB), arguments.exclude, "B")
 
     val (uniqA, uniqB) = Comparator.compare(dataA, dataB)
 
     // compute diff todo will be solved by issue #3
 
-    val metrics: String = Comparator.createMetrics(dataA, dataB, uniqA, uniqB)
+    val metrics: String = Comparator.createMetrics(dataA, dataB, uniqA, uniqB, arguments.exclude)
 
     // write to files
     val out = arguments.out
