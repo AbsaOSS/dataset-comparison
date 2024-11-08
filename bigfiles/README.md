@@ -4,6 +4,7 @@ This is scala implementation of the project. It is used for comparing big files.
 
 - [How to run](#how-to-run)
   - [Requirements](#requirements)
+  - [Switch to specific SDK](#switch-to-specific-sdk)
 - [How to run tests](#how-to-run-tests)
 
 ## How to run
@@ -19,10 +20,27 @@ spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-pa
 ### Requirements
 
 - scala 2.12
-- spark 3.5.3
-- java 17
-- 
+- spark 3.5.1
+- java 11.0.24-amzn
+
 more requirements are in [Dependency](project/Dependencies.scala) file
+
+### Switch to specific SDK
+You can use following command to switch to
+the configuration present in `.sdkmanrc` file.
+```bash 
+sdk env
+```
+To switch back run following command:
+```bash
+sdk env clear
+```
+If you don't have some version installed you can
+install them all by running following command:
+```bash
+sdk env install
+```
+
 ## How to run tests
 
 
@@ -32,7 +50,9 @@ more requirements are in [Dependency](project/Dependencies.scala) file
 
 
 ---------
+
 ## Installing hadoop
+
 tutorial [here](https://dev.to/awwsmm/installing-and-running-hadoop-and-spark-on-ubuntu-18-393h) 
 1. sdk install hadoop
 2. ``$ echo "export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin" >> ~/.bashrc``
@@ -132,4 +152,5 @@ or you can uncomment code at the start of validate part in ArgsParserTest and ch
 FS to HDFS_URI and then run `sbt test`
 
 ### Setting up IntelliJ IDEA
+
 ![img_1.png](images/settings.png)
