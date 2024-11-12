@@ -41,7 +41,13 @@ object ArgsParser {
         opt[String]("fsURI") // hdfs URI
           .required()
           .action((x, c) => c.copy(fsURI = x))
-          .text("file system URI")
+          .text("file system URI"),
+        opt[Seq[String]]('e', "exclude") // columns to exclude
+          .valueName("<column1>,<column2>...")
+          .action((x, c) => c.copy(exclude = x))
+          .text("columns to exclude. Default: empty. Columns will be" +
+            " excluded from both tables if they are present." +
+            " Dont put spaces between columns only commas."),
       )
     }
 
@@ -59,8 +65,6 @@ object ArgsParser {
    * @return true if the arguments are valid
    */
   def validate(args: Arguments): Boolean = {
-//    val fs = FileSystem.getLocal( new Configuration())
-//    fs.setWorkingDirectory(new Path(args.fsURI))
     val fs = FileSystem.get(new URI(args.fsURI), new Configuration())
     if (!fs.exists(new Path(args.inputA))) throw new IllegalArgumentException(s"Input ${args.inputA} does not exist")
     if (!fs.exists(new Path(args.inputB))) throw new IllegalArgumentException(s"Input ${args.inputB} does not exist")
