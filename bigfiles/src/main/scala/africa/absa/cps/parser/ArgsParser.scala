@@ -1,9 +1,9 @@
 package africa.absa.cps.parser
 
-import org.apache.hadoop.conf.Configuration
 
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.Path
+import org.apache.spark.sql.SparkSession
 import scopt.OParser
 
 import java.net.URI
@@ -38,10 +38,6 @@ object ArgsParser {
           .valueName("<file>")
           .action((x, c) => c.copy(inputB = x))
           .text("inputB paths to compare"),
-        opt[String]("fsURI") // hdfs URI
-          .required()
-          .action((x, c) => c.copy(fsURI = x))
-          .text("file system URI"),
         opt[Seq[String]]('e', "exclude") // columns to exclude
           .valueName("<column1>,<column2>...")
           .action((x, c) => c.copy(exclude = x))
@@ -64,8 +60,9 @@ object ArgsParser {
    * @param args arguments to validate
    * @return true if the arguments are valid
    */
-  def validate(args: Arguments): Boolean = {
-    val fs = FileSystem.get(new URI(args.fsURI), new Configuration())
+  def validate(args: Arguments)(implicit spark: SparkSession): Boolean = {
+    val config = spark.sparkContext.hadoopConfiguration
+    val fs = FileSystem.get(config)
     if (!fs.exists(new Path(args.inputA))) throw new IllegalArgumentException(s"Input ${args.inputA} does not exist")
     if (!fs.exists(new Path(args.inputB))) throw new IllegalArgumentException(s"Input ${args.inputB} does not exist")
     if (fs.exists(new Path(args.out))) throw new IllegalArgumentException(s"Output ${args.out} already exist")

@@ -7,6 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import org.json4s.JsonDSL._
 
 import java.io.File
+import java.nio.file.Paths
 import scala.reflect.io.Directory
 
 class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter{
@@ -62,11 +63,13 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
           ("same records count" -> 97) ~
           ("same records percent" -> (math floor (97.0/100)*10000)/100))
 
-    IOHandler.jsonWrite(jsonPath, compact(render(metricsJson)))
+    IOHandler.jsonWrite(Paths.get(jsonPath).toString, compact(render(metricsJson)))
 
+    import org.json4s._
+    import org.json4s.native.JsonMethods._
     val df = spark.read.json(jsonPath)
-    val lines = df.collect().mkString("\n")
-    assert(lines === compact(render(List(metricsJson))))
+    val lines = df.toJSON.collect().mkString
+    assert(parse(lines) === metricsJson)
   }
 }
 
