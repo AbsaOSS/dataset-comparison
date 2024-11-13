@@ -1,12 +1,11 @@
 package africa.absa.cps.io
 
-import org.apache.spark.sql.catalyst.dsl.expressions.StringToAttributeConversionHelper
-import org.apache.spark.sql.functions.from_json
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.io.IOUtils
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.nio.file.{Files, Paths}
+import java.io.ByteArrayInputStream
 
 object IOHandler{
 
@@ -41,9 +40,19 @@ object IOHandler{
    * @param jsonString to write
    */
   def jsonWrite(filePath: String, jsonString: String)(implicit spark: SparkSession): Unit = {
+    val config = spark.sparkContext.hadoopConfiguration
+    val fs = FileSystem.get(config)
     logger.info(s"Saving json data to $filePath")
-    import spark.implicits._
-    Seq(jsonString).toDS.write.json(filePath)
+    // save the json string to a file
+    val path = new Path(filePath)
+    val outputStream = fs.create(path)
+    val inputStream = new ByteArrayInputStream(jsonString.getBytes("UTF-8"))
+    try {
+      IOUtils.copyBytes(inputStream, outputStream, config, true)
+    } finally {
+      IOUtils.closeStream(inputStream)
+      IOUtils.closeStream(outputStream)
+    }
   }
 
 }

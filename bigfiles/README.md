@@ -17,6 +17,17 @@ Then run:
 spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>  --fsURI <uri.to.fs>
 ```
 
+### Spark configuration
+you can set spark configuration in `spark-defaults.conf` file it is stored in `$SPARK_HOME/conf` directory
+You will found there `spark-defaults.conf.template` remove `.template` from the file name and set your configuration there.
+It could look like this:
+
+```bash
+spark.hadoop.fs.default.name       hdfs://localhost:9999/ # set your hdfs uri
+spark.hadoop.fs.defaultFS          hdfs://localhost:9999/ # set your hdfs uri
+
+```
+
 ### Requirements
 
 - scala 2.12
