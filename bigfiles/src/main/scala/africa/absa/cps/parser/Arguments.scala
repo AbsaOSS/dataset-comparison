@@ -12,7 +12,7 @@ case class Arguments(
                    out: String = "",
                    inputA: String = "",
                    inputB: String = "",
-                   diff: DiffComputeType.Value = DiffComputeType.None
+                   diff: DiffComputeType.Value = DiffComputeType.None,
                    exclude: Seq[String] = Seq()
                  )
 

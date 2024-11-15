@@ -1,7 +1,8 @@
 
 import africa.absa.cps.analysis.RowByRowAnalysis.analyse
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType}
 import org.json4s.native.JsonMethods.{compact, parse, render}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -88,6 +89,88 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     assert(jsonStringB.contains("\"010b100 100b100\":{\"value\":[\"4.5\",\"4.0\"]}"))
     assert(jsonStringB.contains("\"011c011 011c101\":{\"id\":[\"4\",\"3\"]}"))
   }
+
+  test("test analyses one DataFrame is empty"){
+    val schema = StructType(Seq(
+      StructField("id", IntegerType, nullable = true),
+      StructField("name", StringType, nullable = true),
+      StructField("value", DoubleType, nullable = true),
+      StructField(HASH_COLUMN_NAME, StringType, nullable = true)
+    ))
+
+    val dataA = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], schema)
+
+    val dataB = Seq(
+      (1, "b", 3.0, "001b010"),
+      (4, "b", 4.5, "010b100"),
+      (4, "c", 5.0, "011c011")
+    ).toDF("id", "name", "value", HASH_COLUMN_NAME)
+
+
+    val diff = analyse(dataA, dataB)
+    val jsonStringA = compact(render(parse(diff._1)))
+    assert(jsonStringA == "{\"result\":\"All rows matched\"}")
+
+    val jsonStringB = compact(render(parse(diff._2)))
+    assert(jsonStringB == "{\"result\":\"There is no other row in A look to inputB_differences\"}")
+
+    val diffReverse = analyse(dataB, dataA)
+    val jsonStringBRe = compact(render(parse(diffReverse._1)))
+    assert(jsonStringBRe == "{\"result\":\"There is no other row in B look to inputA_differences\"}")
+
+    val jsonStringARe = compact(render(parse(diffReverse._2)))
+    assert(jsonStringARe == "{\"result\":\"All rows matched\"}")
+
+
+  }
+
+  test("test analyses one Dataframe is smaller than the other"){
+    val dataA = Seq(
+      (1, "a", 3.0, "001a010"),
+      (4, "b", 4.0, "100b100"),
+    ).toDF("id", "name", "value", HASH_COLUMN_NAME)
+
+    val dataB = Seq(
+      (1, "a", 3.5, "001b010"),
+      (4, "b", 4.5, "010b100"),
+      (3, "c", 5.5, "011c011")
+    ).toDF("id", "name", "value", HASH_COLUMN_NAME)
+
+    val diff = analyse(dataA, dataB)
+    val jsonStringA = compact(render(parse(diff._1)))
+    assert(jsonStringA.contains("\"001a010 001b010\":{\"value\":[\"3.0\",\"3.5\"]}"))
+    assert(jsonStringA.contains("\"100b100 010b100\":{\"value\":[\"4.0\",\"4.5\"]}"))
+
+    val jsonStringB = compact(render(parse(diff._2)))
+    assert(jsonStringB.contains("\"001b010 001a010\":{\"value\":[\"3.5\",\"3.0\"]}"))
+    assert(jsonStringB.contains("\"010b100 100b100\":{\"value\":[\"4.5\",\"4.0\"]}"))
+    assert(jsonStringB.contains("\"011c011 001a010\":{\"id\":[\"3\",\"1\"],\"name\":[\"c\",\"a\"],\"value\":[\"5.5\",\"3.0\"]}") ||
+           jsonStringB.contains("\"011c011 100b100\":{\"id\":[\"3\",\"4\"],\"name\":[\"c\",\"b\"],\"value\":[\"5.5\",\"4.0\"]}"))
+  }
+
+  test("test analyses no changes"){
+    val dataA = Seq(
+      (1, "a", 3.0, "001a010"),
+      (4, "b", 4.0, "100b100"),
+      (3, "c", 5.0, "011c101")
+    ).toDF("id", "name", "value", HASH_COLUMN_NAME)
+
+    val dataB = Seq(
+      (1, "a", 3.0, "001a010"),
+      (4, "b", 4.0, "100b100"),
+      (3, "c", 5.0, "011c101")
+    ).toDF("id", "name", "value", HASH_COLUMN_NAME)
+
+    val diff = analyse(dataA, dataB)
+    val jsonStringA = compact(render(parse(diff._1)))
+    assert(jsonStringA.contains("{\"001a010 001a010\":{},\"100b100 100b100\":{},\"011c101 011c101\":{}}"))
+
+    val jsonStringB = compact(render(parse(diff._2)))
+    assert(jsonStringB.contains("{\"001a010 001a010\":{},\"100b100 100b100\":{},\"011c101 011c101\":{}}"))
+  }
+
+
+
 }
 
 

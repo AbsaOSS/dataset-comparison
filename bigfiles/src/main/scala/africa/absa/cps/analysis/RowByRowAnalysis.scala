@@ -22,7 +22,7 @@ object RowByRowAnalysis {
    * @return best match statistics.
    */
   @tailrec
-  private def getBest(rowA: Row,  diffB: DataFrame, stats: AnalyseStat): AnalyseStat = {
+  private def getBest(rowA: Row, diffB: DataFrame, stats: AnalyseStat): AnalyseStat = {
     logger.debug("Get the current row from DataFrame B")
     val rowB = diffB.head()
     val diffBTail = diffB.except(diffB.limit(1))
@@ -107,14 +107,9 @@ object RowByRowAnalysis {
    */
   @tailrec
   private def generateDiffJson(diffA: DataFrame, indexA: Int, diffB: DataFrame, name: String, res: String = "{"): String = {
-//    //
-//    diffA.foreach(rowA => {diffB.foreach(rowB => {
-//      // ignore field HASH_COLUMN_NAME
-//
-//    })})
-
     val rowA = diffA.head()
     val diffATail = diffA.except(diffA.limit(1))
+
     logger.info(s"Compute best match for row: ${rowA.toString()}")
     val best = getBest(rowA, diffB, AnalyseStat(bestScore = rowA.length + 1, mask = Seq[Int](), bestRowB = Row()))
 
@@ -122,8 +117,10 @@ object RowByRowAnalysis {
     logger.info("Get the hash values for the rows")
     val hashA = rowA.getAs[String](HASH_COLUMN_NAME)
     val hashB = best.bestRowB.getAs[String](HASH_COLUMN_NAME)
+
     logger.info("Applying mask to columns")
     val (maskedColumns, maskedA, maskedB) = getMasked(diffA, rowA, best.bestRowB, best.mask)
+
     logger.info("Computing the difference")
     val diffForRow = s""""${hashA} ${hashB}":{ ${getDiff(maskedColumns, maskedA, maskedB)}}, \n"""
     if (!diffATail.isEmpty) generateDiffJson(diffATail, indexA + 1, diffB, name, res + diffForRow)
@@ -141,6 +138,11 @@ object RowByRowAnalysis {
    */
   def analyse(diffA: DataFrame, diffB: DataFrame): (String, String) = {
     logger.info("Row by row analysis")
-    (generateDiffJson(diffA, 0, diffB, "A") , generateDiffJson(diffB, 0, diffA, "B"))
+    if (diffA.isEmpty || diffB.isEmpty){
+      val resA = if (diffA.isEmpty) "\"All rows matched\"" else "\"There is no other row in B look to inputA_differences\""
+      val resB = if (diffB.isEmpty) "\"All rows matched\"" else "\"There is no other row in A look to inputB_differences\""
+      (s"""{"result": $resA}""", s"""{"result": $resB}""")
+    }
+    else (generateDiffJson(diffA, 0, diffB, "A") , generateDiffJson(diffB, 0, diffA, "B"))
   }
 }
