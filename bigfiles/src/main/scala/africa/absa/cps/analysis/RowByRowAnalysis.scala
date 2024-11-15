@@ -1,6 +1,7 @@
 package africa.absa.cps.analysis
 
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
+import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -10,37 +11,38 @@ object RowByRowAnalysis {
 
   private val logger: Logger = LoggerFactory.getLogger(RowByRowAnalysis.getClass)
 
+
   /**
    * Recursively finds the best matching row in diffB
    * for the given rowA based on the minimum difference score.
    *
    * @param rowA The row from DataFrame A to compare.
    * @param diffB The DataFrame B to compare against.
-   * @param indexB The current index in DataFrame B.
    * @param stats The current best match statistics.
    * @return best match statistics.
    */
   @tailrec
-  private def getBest(rowA: Row, diffB: DataFrame, indexB: Int, stats: AnalyseStat): AnalyseStat = {
+  private def getBest(rowA: Row,  diffB: DataFrame, stats: AnalyseStat): AnalyseStat = {
     logger.debug("Get the current row from DataFrame B")
-    val rowB = diffB.collect()(indexB)
+    val rowB = diffB.head()
+    val diffBTail = diffB.except(diffB.limit(1))
 
     logger.debug(s"Calculate the difference score between rowA ${rowA.toString()} and rowB ${rowB.toString()}")
     val diff = rowA.toSeq.zip(rowB.toSeq).map { case (a, b) => if (a == b) 0 else 1 }
     val score = diff.sum
 
-    if (indexB < diffB.count() - 1) {
+    if (!diffBTail.isEmpty) {
       if (score < stats.bestScore) {
         logger.debug("Changing best score")
-        getBest(rowA, diffB, indexB + 1, AnalyseStat(bestScore = score, mask = diff, index = indexB) )
+        getBest(rowA, diffBTail, AnalyseStat(bestScore = score, mask = diff, bestRowB = rowB) )
       }
       else {
-        getBest(rowA, diffB, indexB + 1, stats)
+        getBest(rowA, diffBTail, stats)
       }
     }
     else {
       logger.debug(s"Returning the best score stats")
-      if (score < stats.bestScore) AnalyseStat(bestScore = score, mask = diff, index = indexB)  else stats
+      if (score < stats.bestScore) AnalyseStat(bestScore = score, mask = diff, bestRowB = rowB)  else stats
     }
 
   }
@@ -50,27 +52,47 @@ object RowByRowAnalysis {
    * between two DataFrames for a given row.
    *
    * @param maskedColumns The columns to compare.
-   * @param diffA The DataFrame A to compare.
-   * @param indexA The current index in DataFrame A.
-   * @param diffB The DataFrame B to compare against.
+   * @param maskedA masked row A to compare.
+   * @param maskedB masked row B to compare against.
    * @param res The accumulated result string.
    * @return The JSON string representing the differences for the given row.
    */
   @tailrec
-  private def getDiff(maskedColumns: Array[String], diffA: DataFrame, indexA: Int, diffB: DataFrame, res: String = ""): String = {
+  private def getDiff(maskedColumns: Array[String], maskedA: Seq[Any], maskedB: Seq[Any], res: String = ""): String = {
     if (maskedColumns.isEmpty) {
       res
     }
     else {
       val columnName = maskedColumns.head
       // Skip the hash column
-      if (columnName == HASH_COLUMN_NAME) getDiff(maskedColumns.tail, diffA, indexA, diffB, res)
+      if (columnName == HASH_COLUMN_NAME) getDiff(maskedColumns.tail, maskedA.tail, maskedB.tail, res)
       else {
-        val a = diffA.select(columnName).collect()(indexA).get(0)
-        val b = diffB.select(columnName).collect()(indexA).get(0)
-        getDiff(maskedColumns.tail, diffA, indexA, diffB, s"""$res\"$columnName\": ["$a", "$b"], """)
+        val a = maskedA.head
+        val b = maskedB.head
+        getDiff(maskedColumns.tail, maskedA.tail, maskedB.tail, s"""$res\"$columnName\": ["$a", "$b"], """)
       }
     }
+  }
+
+  /**
+   * Apply a mask to the columns of the DataFrame and rows A and B
+   * @param diffA The DataFrame A to compare.
+   * @param rowA The current row in DataFrame A.
+   * @param rowB The current row in DataFrame B.
+   * @param mask The mask to apply.
+   * @return masked columns, masked row A and masked row B
+   */
+  private def getMasked(diffA: DataFrame, rowA: Row, rowB: Row, mask: Seq[Int]):(Array[String], Seq[Any], Seq[Any] ) = {
+    val maskedColumns = diffA.columns.zip(mask).collect {
+      case (col, 1) => col
+    }
+    val maskedA = rowA.toSeq.zip(mask).collect {
+      case (col, 1) => col
+    }
+    val maskedB = rowB.toSeq.zip(mask).collect {
+      case (col, 1) => col
+    }
+    (maskedColumns, maskedA, maskedB)
   }
 
   /**
@@ -85,23 +107,30 @@ object RowByRowAnalysis {
    */
   @tailrec
   private def generateDiffJson(diffA: DataFrame, indexA: Int, diffB: DataFrame, name: String, res: String = "{"): String = {
-    val rowA = diffA.collect()(indexA)
-    logger.info(s"Compute best match for row: ${rowA.toString()}")
-    val best = getBest(rowA, diffB, 0, AnalyseStat(bestScore = rowA.length + 1, mask = Seq[Int](), index = -1))
+//    //
+//    diffA.foreach(rowA => {diffB.foreach(rowB => {
+//      // ignore field HASH_COLUMN_NAME
+//
+//    })})
 
-    logger.debug(s"${best.bestScore} score for row ${indexA} in ${name}, row index ${best.index}, mask ${best.mask}\n")
+    val rowA = diffA.head()
+    val diffATail = diffA.except(diffA.limit(1))
+    logger.info(s"Compute best match for row: ${rowA.toString()}")
+    val best = getBest(rowA, diffB, AnalyseStat(bestScore = rowA.length + 1, mask = Seq[Int](), bestRowB = Row()))
+
+    logger.debug(s"${best.bestScore} score for row ${rowA} in ${name}, row B ${best.bestRowB}, mask ${best.mask}\n")
     logger.info("Get the hash values for the rows")
-    val hashA = diffA.select(HASH_COLUMN_NAME).collect()(indexA).get(0)
-    val hashB = diffB.select(HASH_COLUMN_NAME).collect()(best.index).get(0)
+    val hashA = rowA.getAs[String](HASH_COLUMN_NAME)
+    val hashB = best.bestRowB.getAs[String](HASH_COLUMN_NAME)
     logger.info("Applying mask to columns")
-    val maskedColumns = diffA.columns.zip(best.mask).collect {
-      case (col, 1) => col
-    }
+    val (maskedColumns, maskedA, maskedB) = getMasked(diffA, rowA, best.bestRowB, best.mask)
     logger.info("Computing the difference")
-    val diffForRow = s""""${hashA} ${hashB}":{ ${getDiff(maskedColumns, diffA, indexA, diffB)}}, \n"""
-    if (indexA < diffA.count() - 1) generateDiffJson(diffA, indexA + 1, diffB, name, res + diffForRow)
+    val diffForRow = s""""${hashA} ${hashB}":{ ${getDiff(maskedColumns, maskedA, maskedB)}}, \n"""
+    if (!diffATail.isEmpty) generateDiffJson(diffATail, indexA + 1, diffB, name, res + diffForRow)
     else res + diffForRow + "}"
   }
+
+
 
   /**
    * Analyse the differences between two DataFrames
