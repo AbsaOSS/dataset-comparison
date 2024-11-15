@@ -21,9 +21,10 @@ object Comparator {
    * @param dataB B DataFrame whole data
    * @param diffA only diff rows in A DataFrame
    * @param diffB only diff rows in B DataFrame
+   * @param excludedColumns columns that were excluded from comparison
    * @return JSON string with metrics
    */
-  def createMetrics(dataA: DataFrame, dataB: DataFrame, diffA: DataFrame, diffB: DataFrame): String = {
+  def createMetrics(dataA: DataFrame, dataB: DataFrame, diffA: DataFrame, diffB: DataFrame, excludedColumns: Seq[String]): String = {
 
     logger.info("Computing metrics")
 
@@ -40,16 +41,18 @@ object Comparator {
       ("A" ->
         ("row count" -> rowCountA) ~
         ("column count" -> dataA.columns.length) ~
-        ("rows not present in B" -> diffCountA)) ~
-        ("unique rows count" -> uniqRowCountA) ~
+        ("rows not present in B" -> diffCountA) ~
+        ("unique rows count" -> uniqRowCountA)) ~
       ("B" ->
           ("row count" -> rowCountB) ~
           ("column count" -> dataB.columns.length) ~
-          ("rows not present in A" -> diffCountB)) ~
-          ("unique rows count" -> uniqRowCountB) ~
+          ("rows not present in A" -> diffCountB) ~
+          ("unique rows count" -> uniqRowCountB)) ~
       ("general" ->
           ("same records count" -> sameRecords) ~
-          ("same records percent to A" -> (math floor (sameRecords.toFloat/rowCountA)*10000)/100))
+          ("same records percent to A" -> (math floor (sameRecords.toFloat/rowCountA)*10000)/100) ~
+          ("excluded columns" -> excludedColumns.mkString(", "))
+        )
 
     compact(render(metricsJson))
   }

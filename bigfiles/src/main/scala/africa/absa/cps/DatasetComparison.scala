@@ -12,27 +12,23 @@ object DatasetComparison {
   def main(args: Array[String]): Unit = {
     val arguments = ArgsParser.getArgs(args)
 
-    // validate arguments
-    ArgsParser.validate(arguments)
-
     implicit val spark: SparkSession = SparkSession.builder()
       .appName("DatasetComparator")
-      .config("spark.hadoop.fs.default.name", arguments.fsURI)
-      .config("spark.hadoop.fs.defaultFS", arguments.fsURI)
-      .config("spark.hadoop.fs.hdfs.impl", classOf[org.apache.hadoop.hdfs.DistributedFileSystem].getName)
-      .config("spark.hadoop.fs.hdfs.server", classOf[org.apache.hadoop.hdfs.server.namenode.NameNode].getName)
-      .config("spark.hadoop.conf", classOf[org.apache.hadoop.hdfs.HdfsConfiguration].getName)
       .getOrCreate()
 
     import spark.implicits._
 
+    // validate arguments
+    ArgsParser.validate(arguments)
+
     // read data
-    val dataA: DataFrame = IOHandler.sparkRead(arguments.inputA)
-    val dataB: DataFrame = IOHandler.sparkRead(arguments.inputB)
+    val dataA: DataFrame = DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputA), arguments.exclude, "A")
+    val dataB: DataFrame = DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputB), arguments.exclude, "B")
 
     val (uniqA, uniqB) = Comparator.compare(dataA, dataB)
 
-    val metrics: String = Comparator.createMetrics(dataA, dataB, uniqA, uniqB)
+
+    val metrics: String = Comparator.createMetrics(dataA, dataB, uniqA, uniqB, arguments.exclude)
 
     // write to files
     val out = arguments.out

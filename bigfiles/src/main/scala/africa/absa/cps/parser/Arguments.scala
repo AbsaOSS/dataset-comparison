@@ -1,6 +1,5 @@
 package africa.absa.cps.parser
 
-import java.io.File
 
 object DiffComputeType extends Enumeration {
   val None, Row = Value
@@ -13,7 +12,7 @@ case class Arguments(
                    out: String = "",
                    inputA: String = "",
                    inputB: String = "",
-                   fsURI: String = "",
                    diff: DiffComputeType.Value = DiffComputeType.None
+                   exclude: Seq[String] = Seq()
                  )
 
