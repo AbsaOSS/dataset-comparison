@@ -13,6 +13,7 @@ object Dependencies {
     val slf4jApi = "2.0.16"
     val logback = "1.2.3"
     val hadoop = "3.3.5"
+    val config = "1.4.3"
   }
   def bigfilesDependencies: Seq[ModuleID] = {
     lazy val fansi = "com.lihaoyi" %% "fansi" % Versions.fansi
@@ -24,6 +25,7 @@ object Dependencies {
     lazy val hadoopCommon = "org.apache.hadoop" % "hadoop-common" % Versions.hadoop
     lazy val hadoopClient = "org.apache.hadoop" % "hadoop-client" % Versions.hadoop
     lazy val hdfs = "org.apache.hadoop" % "hadoop-hdfs" % Versions.hadoop
+    lazy val config = "com.typesafe" % "config" % Versions.config
 
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
 
@@ -37,7 +39,8 @@ object Dependencies {
       slf4jApi,
       hadoopCommon,
       hadoopClient,
-      hdfs
+      hdfs,
+      config
     )
   }
 }

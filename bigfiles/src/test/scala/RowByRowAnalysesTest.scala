@@ -14,80 +14,80 @@ class RowByRowAnalysesTest extends AnyFunSuite{
 
   test("test analyses multiple changes") {
     val dataA = Seq(
-      (1, "a", 3.0, "001a010"),
-      (4, "b", 4.0, "100b100"),
-      (3, "c", 5.0, "011c101")
+      (1, "a", 3.0, 11133),
+      (4, "b", 4.0, 49840),
+      (3, "c", 5.0, 39950)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val dataB = Seq(
-      (1, "b", 3.0, "001b010"),
-      (2, "b", 4.5, "010b100"),
-      (3, "c", 3.0, "011c011")
+      (1, "b", 3.0, 19830),
+      (2, "b", 4.5, 29845),
+      (3, "c", 3.0, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
 
     val diff = analyse(dataA, dataB)
     val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"001a010 001b010\":{\"name\":[\"a\",\"b\"]}"))
-    assert(jsonStringA.contains("\"100b100 010b100\":{\"id\":[\"4\",\"2\"],\"value\":[\"4.0\",\"4.5\"]}") || jsonStringA.contains("\"100b100 001b010\":{\"id\":[\"4\",\"1\"],\"value\":[\"4.0\",\"3.0\"]}"))
-    assert(jsonStringA.contains("\"011c101 011c011\":{\"value\":[\"5.0\",\"3.0\"]}"))
+    assert(jsonStringA.contains("\"11133 19830\":{\"name\":[\"a\",\"b\"]}"))
+    assert(jsonStringA.contains("\"49840 29845\":{\"id\":[\"4\",\"2\"],\"value\":[\"4.0\",\"4.5\"]}") || jsonStringA.contains("\"49840 19830\":{\"id\":[\"4\",\"1\"],\"value\":[\"4.0\",\"3.0\"]}"))
+    assert(jsonStringA.contains("\"39950 39955\":{\"value\":[\"5.0\",\"3.0\"]}"))
 
     val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"001b010 001a010\":{\"name\":[\"b\",\"a\"]}"))
-    assert(jsonStringB.contains("\"010b100 100b100\":{\"id\":[\"2\",\"4\"],\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"011c011 011c101\":{\"value\":[\"3.0\",\"5.0\"]}"))
+    assert(jsonStringB.contains("\"19830 11133\":{\"name\":[\"b\",\"a\"]}"))
+    assert(jsonStringB.contains("\"29845 49840\":{\"id\":[\"2\",\"4\"],\"value\":[\"4.5\",\"4.0\"]}"))
+    assert(jsonStringB.contains("\"39955 39950\":{\"value\":[\"3.0\",\"5.0\"]}"))
 
 
   }
   test("test analyses change in the same column") {
     val dataA = Seq(
-      (1, "a", 3.0, "001a010"),
-      (4, "b", 4.0, "100b100"),
-      (3, "c", 5.0, "011c101")
+      (1, "a", 3.0, 11133),
+      (4, "b", 4.0, 49840),
+      (3, "c", 5.0, 39950)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val dataB = Seq(
-      (1, "a", 3.5, "001b010"),
-      (4, "b", 4.5, "010b100"),
-      (3, "c", 5.5, "011c011")
+      (1, "a", 3.5, 19830),
+      (4, "b", 4.5, 29845),
+      (3, "c", 5.5, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val diff = analyse(dataA, dataB)
     val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"001a010 001b010\":{\"value\":[\"3.0\",\"3.5\"]}"))
-    assert(jsonStringA.contains("\"100b100 010b100\":{\"value\":[\"4.0\",\"4.5\"]}"))
-    assert(jsonStringA.contains("\"011c101 011c011\":{\"value\":[\"5.0\",\"5.5\"]}"))
+    assert(jsonStringA.contains("\"11133 19830\":{\"value\":[\"3.0\",\"3.5\"]}"))
+    assert(jsonStringA.contains("\"49840 29845\":{\"value\":[\"4.0\",\"4.5\"]}"))
+    assert(jsonStringA.contains("\"39950 39955\":{\"value\":[\"5.0\",\"5.5\"]}"))
 
     val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"001b010 001a010\":{\"value\":[\"3.5\",\"3.0\"]}"))
-    assert(jsonStringB.contains("\"010b100 100b100\":{\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"011c011 011c101\":{\"value\":[\"5.5\",\"5.0\"]}"))
+    assert(jsonStringB.contains("\"19830 11133\":{\"value\":[\"3.5\",\"3.0\"]}"))
+    assert(jsonStringB.contains("\"29845 49840\":{\"value\":[\"4.5\",\"4.0\"]}"))
+    assert(jsonStringB.contains("\"39955 39950\":{\"value\":[\"5.5\",\"5.0\"]}"))
   }
 
   test("test analyses one change in different columns"){
     val dataA = Seq(
-      (1, "a", 3.0, "001a010"),
-      (4, "b", 4.0, "100b100"),
-      (3, "c", 5.0, "011c101")
+      (1, "a", 3.0, 11133),
+      (4, "b", 4.0, 49840),
+      (3, "c", 5.0, 39950)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val dataB = Seq(
-      (1, "b", 3.0, "001b010"),
-      (4, "b", 4.5, "010b100"),
-      (4, "c", 5.0, "011c011")
+      (1, "b", 3.0, 19830),
+      (4, "b", 4.5, 29845),
+      (4, "c", 5.0, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
 
     val diff = analyse(dataA, dataB)
     val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"001a010 001b010\":{\"name\":[\"a\",\"b\"]}"))
-    assert(jsonStringA.contains("\"100b100 010b100\":{\"value\":[\"4.0\",\"4.5\"]}"))
-    assert(jsonStringA.contains("\"011c101 011c011\":{\"id\":[\"3\",\"4\"]}"))
+    assert(jsonStringA.contains("\"11133 19830\":{\"name\":[\"a\",\"b\"]}"))
+    assert(jsonStringA.contains("\"49840 29845\":{\"value\":[\"4.0\",\"4.5\"]}"))
+    assert(jsonStringA.contains("\"39950 39955\":{\"id\":[\"3\",\"4\"]}"))
 
     val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"001b010 001a010\":{\"name\":[\"b\",\"a\"]}"))
-    assert(jsonStringB.contains("\"010b100 100b100\":{\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"011c011 011c101\":{\"id\":[\"4\",\"3\"]}"))
+    assert(jsonStringB.contains("\"19830 11133\":{\"name\":[\"b\",\"a\"]}"))
+    assert(jsonStringB.contains("\"29845 49840\":{\"value\":[\"4.5\",\"4.0\"]}"))
+    assert(jsonStringB.contains("\"39955 39950\":{\"id\":[\"4\",\"3\"]}"))
   }
 
   test("test analyses one DataFrame is empty"){
@@ -101,9 +101,9 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     val dataA = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], schema)
 
     val dataB = Seq(
-      (1, "b", 3.0, "001b010"),
-      (4, "b", 4.5, "010b100"),
-      (4, "c", 5.0, "011c011")
+      (1, "b", 3.0, 19830),
+      (4, "b", 4.5, 29845),
+      (4, "c", 5.0, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
 
@@ -126,47 +126,47 @@ class RowByRowAnalysesTest extends AnyFunSuite{
 
   test("test analyses one Dataframe is smaller than the other"){
     val dataA = Seq(
-      (1, "a", 3.0, "001a010"),
-      (4, "b", 4.0, "100b100"),
+      (1, "a", 3.0, 11133),
+      (4, "b", 4.0, 49840),
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val dataB = Seq(
-      (1, "a", 3.5, "001b010"),
-      (4, "b", 4.5, "010b100"),
-      (3, "c", 5.5, "011c011")
+      (1, "a", 3.5, 19830),
+      (4, "b", 4.5, 29845),
+      (3, "c", 5.5, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val diff = analyse(dataA, dataB)
     val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"001a010 001b010\":{\"value\":[\"3.0\",\"3.5\"]}"))
-    assert(jsonStringA.contains("\"100b100 010b100\":{\"value\":[\"4.0\",\"4.5\"]}"))
+    assert(jsonStringA.contains("\"11133 19830\":{\"value\":[\"3.0\",\"3.5\"]}"))
+    assert(jsonStringA.contains("\"49840 29845\":{\"value\":[\"4.0\",\"4.5\"]}"))
 
     val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"001b010 001a010\":{\"value\":[\"3.5\",\"3.0\"]}"))
-    assert(jsonStringB.contains("\"010b100 100b100\":{\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"011c011 001a010\":{\"id\":[\"3\",\"1\"],\"name\":[\"c\",\"a\"],\"value\":[\"5.5\",\"3.0\"]}") ||
-           jsonStringB.contains("\"011c011 100b100\":{\"id\":[\"3\",\"4\"],\"name\":[\"c\",\"b\"],\"value\":[\"5.5\",\"4.0\"]}"))
+    assert(jsonStringB.contains("\"19830 11133\":{\"value\":[\"3.5\",\"3.0\"]}"))
+    assert(jsonStringB.contains("\"29845 49840\":{\"value\":[\"4.5\",\"4.0\"]}"))
+    assert(jsonStringB.contains("\"39955 11133\":{\"id\":[\"3\",\"1\"],\"name\":[\"c\",\"a\"],\"value\":[\"5.5\",\"3.0\"]}") ||
+           jsonStringB.contains("\"39955 49840\":{\"id\":[\"3\",\"4\"],\"name\":[\"c\",\"b\"],\"value\":[\"5.5\",\"4.0\"]}"))
   }
 
   test("test analyses no changes"){
     val dataA = Seq(
-      (1, "a", 3.0, "001a010"),
-      (4, "b", 4.0, "100b100"),
-      (3, "c", 5.0, "011c101")
+      (1, "a", 3.0, 11133),
+      (4, "b", 4.0, 49840),
+      (3, "c", 5.0, 39950)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val dataB = Seq(
-      (1, "a", 3.0, "001a010"),
-      (4, "b", 4.0, "100b100"),
-      (3, "c", 5.0, "011c101")
+      (1, "a", 3.0, 11133),
+      (4, "b", 4.0, 49840),
+      (3, "c", 5.0, 39950)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val diff = analyse(dataA, dataB)
     val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("{\"001a010 001a010\":{},\"100b100 100b100\":{},\"011c101 011c101\":{}}"))
+    assert(jsonStringA.contains("{\"11133 11133\":{},\"49840 49840\":{},\"39950 39950\":{}}"))
 
     val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("{\"001a010 001a010\":{},\"100b100 100b100\":{},\"011c101 011c101\":{}}"))
+    assert(jsonStringB.contains("{\"11133 11133\":{},\"49840 49840\":{},\"39950 39950\":{}}"))
   }
 
 

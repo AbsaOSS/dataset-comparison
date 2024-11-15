@@ -115,8 +115,8 @@ object RowByRowAnalysis {
 
     logger.debug(s"${best.bestScore} score for row ${rowA} in ${name}, row B ${best.bestRowB}, mask ${best.mask}\n")
     logger.info("Get the hash values for the rows")
-    val hashA = rowA.getAs[String](HASH_COLUMN_NAME)
-    val hashB = best.bestRowB.getAs[String](HASH_COLUMN_NAME)
+    val hashA = rowA.getAs[Int](HASH_COLUMN_NAME)
+    val hashB = best.bestRowB.getAs[Int](HASH_COLUMN_NAME)
 
     logger.info("Applying mask to columns")
     val (maskedColumns, maskedA, maskedB) = getMasked(diffA, rowA, best.bestRowB, best.mask)
