@@ -1,6 +1,11 @@
 import Dependencies.*
 import sbtassembly.MergeStrategy
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+enablePlugins(GitVersioning, GitBranchPrompt)
+
 ThisBuild / version := "0.1.0"
 ThisBuild / scalaVersion := "2.12.20"
 ThisBuild / organization := "africa.absa.cps"
@@ -11,7 +16,12 @@ lazy val root = (project in file("."))
     assembly / mainClass := Some("africa.absa.cps.DatasetComparison"),
     libraryDependencies ++= bigfilesDependencies,
     Test / fork := true,
-    Test / baseDirectory := (ThisBuild / baseDirectory).value
+    Test / baseDirectory := (ThisBuild / baseDirectory).value,
+    assembly / assemblyJarName :={
+      val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("ddMMYY-HH:mm:ss")
+      val formattedDate: String = LocalDateTime.now().format(formatter)
+      s"CPS-dataset-comparison-v${version.value}-${formattedDate}-${git.gitHeadCommit.value.getOrElse("unknown").take(8)}.jar"
+    }
   )
 
 // JaCoCo code coverage
@@ -28,4 +38,5 @@ ThisBuild / assemblyMergeStrategy :={
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
+
 
