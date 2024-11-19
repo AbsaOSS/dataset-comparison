@@ -55,6 +55,34 @@ jobs:
           script: |
             core.setFailed('Changed files coverage is less than ${{ matrix.changed }}%!')
 
+  build:
+    name: Build and deploy jar file
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: bigfiles
+    strategy:
+      matrix:
+        include:
+          - scala: 2.12.17
+            scalaShort: "2.12"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+      - name: Build jar
+        run: sbt assembly
+      - name: Upload jar
+        run: mkdir staging && cp target/dataset-comparison-*.jar staging
+        uses: actions/upload-artifact@v4
+        with:
+          name: Package
+          path: staging
+
 
   format-check:
     name: Format Check
