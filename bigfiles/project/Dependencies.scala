@@ -62,7 +62,7 @@ object Dependencies {
       fansi,
       scopt,
       slf4jApi,
-      config
+      config,
       jackson,
       snappy
     )
