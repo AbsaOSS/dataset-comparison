@@ -1,6 +1,10 @@
 import Dependencies.*
+import sbt.Package.ManifestAttributes
 import sbtassembly.MergeStrategy
 
+import java.time.LocalDateTime
+
+enablePlugins(GitVersioning, GitBranchPrompt)
 lazy val scala212 = "2.12.20"
 lazy val scala211 = "2.11.12"
 lazy val supportedScalaVersions = List(scala211, scala212)
@@ -27,7 +31,13 @@ lazy val root = (project in file("."))
 
     Test / fork := true,
     Test / baseDirectory := (ThisBuild / baseDirectory).value,
+    packageOptions := Seq(ManifestAttributes(
+      ("Built-By", System.getProperty("user.name")),
+      ("Built-At", LocalDateTime.now().toString),
+      ("Git-Hash", git.gitHeadCommit.value.getOrElse("unknown"))
+    ))
   )
+
 
 // JaCoCo code coverage
 Test / jacocoReportSettings := JacocoReportSettings(
@@ -43,4 +53,5 @@ ThisBuild / assemblyMergeStrategy :={
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
+
 
