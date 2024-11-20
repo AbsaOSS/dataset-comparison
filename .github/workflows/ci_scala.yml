@@ -76,9 +76,20 @@ jobs:
           java-version: "adopt@1.8"
       - name: Build jar
         run: sbt assembly
+      - name: Create staging directory
+        run: mkdir -p staging
+
+      - name: Copy jar to staging
+        run: |
+          if ls target/dataset-comparison-*.jar 1> /dev/null 2>&1; then
+            cp target/dataset-comparison-*.jar staging/
+          else
+            echo "No jar files found"
+            exit 1
+          fi
+
       - name: Upload jar
-        run: mkdir staging && find target -name 'dataset-comparison-*.jar' -exec cp {} staging \;
-      - uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: Package
           path: staging
