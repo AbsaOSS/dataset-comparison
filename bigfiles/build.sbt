@@ -1,8 +1,8 @@
 import Dependencies.*
+import sbt.Package.ManifestAttributes
 import sbtassembly.MergeStrategy
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 enablePlugins(GitVersioning, GitBranchPrompt)
 lazy val scala212 = "2.12.20"
@@ -31,12 +31,13 @@ lazy val root = (project in file("."))
 
     Test / fork := true,
     Test / baseDirectory := (ThisBuild / baseDirectory).value,
-    assembly / assemblyJarName :={
-      val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("ddMMYY-HH:mm:ss")
-      val formattedDate: String = LocalDateTime.now().format(formatter)
-      s"CPS-dataset-comparison-v${version.value}-${formattedDate}-${git.gitHeadCommit.value.getOrElse("unknown").take(8)}.jar"
-    }
+    packageOptions := Seq(ManifestAttributes(
+      ("Built-By", System.getProperty("user.name")),
+      ("Built-At", LocalDateTime.now().toString),
+      ("Git-Hash", git.gitHeadCommit.value.getOrElse("unknown"))
+    ))
   )
+
 
 // JaCoCo code coverage
 Test / jacocoReportSettings := JacocoReportSettings(
