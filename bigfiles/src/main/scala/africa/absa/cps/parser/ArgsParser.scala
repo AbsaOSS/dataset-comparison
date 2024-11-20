@@ -47,7 +47,7 @@ object ArgsParser {
           .action((x, c) => c.copy(exclude = x))
           .text("columns to exclude. Default: empty. Columns will be" +
             " excluded from both tables if they are present." +
-            " Dont put spaces between columns only commas."),
+            " Dont put spaces between columns only commas.")
       )
     }
 

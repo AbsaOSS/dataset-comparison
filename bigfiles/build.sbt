@@ -1,17 +1,32 @@
 import Dependencies.*
 import sbtassembly.MergeStrategy
 
+lazy val scala212 = "2.12.20"
+lazy val scala211 = "2.11.12"
+lazy val supportedScalaVersions = List(scala211, scala212)
+
 ThisBuild / version := "0.1.0"
-ThisBuild / scalaVersion := "2.12.20"
+ThisBuild / scalaVersion := scala212
 ThisBuild / organization := "africa.absa.cps"
 
 lazy val root = (project in file("."))
   .settings(
     name := "dataset-comparison",
+    crossScalaVersions := supportedScalaVersions,
     assembly / mainClass := Some("africa.absa.cps.DatasetComparison"),
-    libraryDependencies ++= bigfilesDependencies,
+    libraryDependencies ++= bigfilesDependencies ++ Seq(
+      "org.apache.spark" %% "spark-core" % sparkVersionForScala(scalaVersion.value) % Provided,
+      "org.apache.spark" %% "spark-sql" % sparkVersionForScala(scalaVersion.value) % Provided,
+      "org.json4s" %% "json4s-native" % jsonVersionForScala(scalaVersion.value),
+      "org.json4s" %% "json4s-jackson" % jsonVersionForScala(scalaVersion.value),
+      "org.apache.hadoop" % "hadoop-common" % hadoopVersionForScala(scalaVersion.value),
+      "org.apache.hadoop" % "hadoop-client" % hadoopVersionForScala(scalaVersion.value),
+      "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersionForScala(scalaVersion.value),
+    ),
+    javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
+
     Test / fork := true,
-    Test / baseDirectory := (ThisBuild / baseDirectory).value
+    Test / baseDirectory := (ThisBuild / baseDirectory).value,
   )
 
 // JaCoCo code coverage
