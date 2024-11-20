@@ -77,7 +77,7 @@ jobs:
       - name: Build jar
         run: sbt assembly
       - name: Upload jar
-        run: mkdir staging && cp target/dataset-comparison-*.jar staging
+        run: mkdir staging && find target -name 'dataset-comparison-*.jar' -exec cp {} staging
       - uses: actions/upload-artifact@v4
         with:
           name: Package
