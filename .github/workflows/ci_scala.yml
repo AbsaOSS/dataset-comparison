@@ -79,8 +79,8 @@ jobs:
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
-      - name: Build jar
-        run: sbt assembly
+      - name: Build jar for Scala ${{ matrix.scala }}
+        run: sbt ++${{ matrix.scala }} assembly
       - name: Create staging directory
         run: mkdir -p staging
 
