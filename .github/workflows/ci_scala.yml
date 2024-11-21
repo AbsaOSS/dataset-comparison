@@ -89,11 +89,6 @@ jobs:
           base_name=$(basename $jar_file)
           cp target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar staging/scala-${{ matrix.scalaShort }}$base_name
           ls staging
-#          jar_file=$(ls target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar)
-#          base_name=$(basename $jar_file)
-#          cp $jar_file staging/
-#          mv staging/$base_name staging/scala-${{ matrix.scalaShort }}-$base_name
-
 
       - name: Upload jar
         uses: actions/upload-artifact@v4
@@ -105,7 +100,7 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ github.run_number }}"
+          automatic_release_tag: "${{ github.run_number }}-${{matrix.scalaShort}}"
           title: "Automated Build ${{ github.run_number }} for scala ${{ matrix.scala }}"
           prerelease: true
           files: bigfiles/staging/*.jar
