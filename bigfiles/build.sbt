@@ -5,6 +5,8 @@ import sbtassembly.MergeStrategy
 import java.time.LocalDateTime
 
 enablePlugins(GitVersioning, GitBranchPrompt)
+enablePlugins(ScalafmtPlugin)
+
 lazy val scala212 = "2.12.20"
 lazy val scala211 = "2.11.12"
 lazy val supportedScalaVersions = List(scala211, scala212)

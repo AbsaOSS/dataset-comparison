@@ -93,7 +93,7 @@ jobs:
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.scalaShort }}$(basename $(ls target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar))
+          name: ${{ matrix.scalaShort }}-$(basename $(ls target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar))
           path: bigfiles/staging
 
 #      - name: Create Release

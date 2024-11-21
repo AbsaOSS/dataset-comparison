@@ -22,3 +22,4 @@ addSbtPlugin("org.ow2.asm" % "asm-tree" % ow2Version from ow2Url("asm-tree"))
 
 addSbtPlugin("za.co.absa.sbt" % "sbt-jacoco" % "3.4.1-absa.4" from "https://github.com/AbsaOSS/sbt-jacoco/releases/download/3.4.1-absa.4/sbt-jacoco-3.4.1-absa.4.jar")
 addSbtPlugin("com.github.sbt" % "sbt-git" % "2.0.0")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
