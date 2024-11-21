@@ -93,15 +93,15 @@ jobs:
         with:
           name: Package
           path: bigfiles/staging
-          retention-days: 1
 
-      - uses: marvinpinto/action-automatic-releases@latest
+      - name: Create Release
+        uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "${{ github.run_number }}"
           title: "Automated Build ${{ github.run_number }}"
           prerelease: true
-          files: staging/*.jar
+          files: bigfiles/staging/*.jar
 
 
   format-check:
