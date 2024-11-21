@@ -7,6 +7,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-22.04
+    env:
+      overall: 0.0
+      changed: 80.0
     defaults:
       run:
         working-directory: bigfiles
@@ -15,8 +18,8 @@ jobs:
         include:
           - scala: 2.12.17
             scalaShort: "2.12"
-            overall: 0.0
-            changed: 80.0
+          - scala: 2.11.12
+            scalaShort: "2.11"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -38,8 +41,8 @@ jobs:
         with:
           paths: ${{ github.workspace }}/bigfiles/target/scala-${{ matrix.scalaShort }}/jacoco/report/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: ${{ matrix.overall }}
-          min-coverage-changed-files: ${{ matrix.changed }}
+          min-coverage-overall: ${{ env.overall }}
+          min-coverage-changed-files: ${{ env.changed }}
           title: JaCoCo code coverage report - scala ${{ matrix.scala }}
           update-comment: true
 
@@ -48,12 +51,12 @@ jobs:
           echo "Total coverage ${{ steps.jacoco-coverage.outputs.coverage-overall }}"
           echo "Changed Files coverage ${{ steps.jacoco-coverage.outputs.coverage-changed-files }}"
 
-      - name: Fail PR if changed files coverage is less than ${{ matrix.changed }}%
+      - name: Fail PR if changed files coverage is less than ${{ env.changed }}%
         if: ${{ steps.jacoco-coverage.outputs.coverage-changed-files < 80.0 }}
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('Changed files coverage is less than ${{ matrix.changed }}%!')
+            core.setFailed('Changed files coverage is less than ${{ env.changed }}%!')
 
   build:
     name: Build and deploy jar file
