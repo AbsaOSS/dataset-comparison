@@ -98,7 +98,7 @@ jobs:
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
-          name: Package
+          name: Package-${{ matrix.scalaShort }}
           path: bigfiles/staging
 
       - name: Create Release
