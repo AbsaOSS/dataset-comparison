@@ -61,6 +61,7 @@ jobs:
   build:
     name: Build and deploy jar file
     runs-on: ubuntu-22.04
+    environment: DEV
     defaults:
       run:
         working-directory: bigfiles
@@ -79,21 +80,26 @@ jobs:
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
+
       - name: Build jar for Scala ${{ matrix.scala }}
         run: sbt ++${{ matrix.scala }} assembly
+
       - name: Create staging directory
         run: mkdir -p staging
+
       - name: Copy jar to staging
         run: |
           jar_file=$(ls target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar)
           base_name=$(basename $jar_file)
           cp target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar staging/scala-${{ matrix.scalaShort }}$base_name
+          echo "artifact_name=scala-${{ matrix.scalaShort }}$base_name" >> $GITHUB_ENV
           ls staging
 
-      - name: Upload jar
+      - name: Upload jar artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.scalaShort }}-$(basename $(ls target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar))
+          name: ${{ env.artifact_name }}
+#          name: ${{ matrix.scalaShort }}-$(basename $(ls target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar))
           path: bigfiles/staging
 
 #      - name: Create Release
