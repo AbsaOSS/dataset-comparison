@@ -10,7 +10,8 @@ object DatasetComparison {
   def main(args: Array[String]): Unit = {
     val arguments = ArgsParser.getArgs(args)
 
-    implicit val spark: SparkSession = SparkSession.builder()
+    implicit val spark: SparkSession = SparkSession
+      .builder()
       .appName("DatasetComparator")
       .getOrCreate()
 
@@ -20,8 +21,10 @@ object DatasetComparison {
     ArgsParser.validate(arguments)
 
     // read data
-    val dataA: DataFrame = DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputA), arguments.exclude, "A")
-    val dataB: DataFrame = DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputB), arguments.exclude, "B")
+    val dataA: DataFrame =
+      DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputA), arguments.exclude, "A")
+    val dataB: DataFrame =
+      DatasetComparisonHelper.exclude(IOHandler.sparkRead(arguments.inputB), arguments.exclude, "B")
 
     val (uniqA, uniqB) = Comparator.compare(dataA, dataB)
 
@@ -39,4 +42,3 @@ object DatasetComparison {
 
   }
 }
-
