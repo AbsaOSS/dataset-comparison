@@ -22,10 +22,10 @@ jobs:
             scalaShort: "2.11"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: "adopt@1.8"
 
@@ -74,10 +74,10 @@ jobs:
             scalaShort: "2.11"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: "adopt@1.8"
 
@@ -120,13 +120,13 @@ jobs:
         working-directory: bigfiles
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: "adopt@1.8"
 
