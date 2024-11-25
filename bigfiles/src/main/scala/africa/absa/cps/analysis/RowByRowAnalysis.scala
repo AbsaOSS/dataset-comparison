@@ -4,6 +4,7 @@ import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
 import org.slf4j.{Logger, LoggerFactory}
+import upickle.default._
 
 import scala.annotation.tailrec
 
@@ -58,7 +59,7 @@ object RowByRowAnalysis {
    * @return The JSON string representing the differences for the given row.
    */
   @tailrec
-  private def getDiff(maskedColumns: Array[String], maskedA: Seq[Any], maskedB: Seq[Any], res: String = ""): String = {
+  private def getDiff(maskedColumns: Array[String], maskedA: Seq[Any], maskedB: Seq[Any], res: List[ColumnsDiff] = List()): List[ColumnsDiff] = {
     if (maskedColumns.isEmpty) {
       res
     }
@@ -69,7 +70,7 @@ object RowByRowAnalysis {
       else {
         val a = maskedA.head
         val b = maskedB.head
-        getDiff(maskedColumns.tail, maskedA.tail, maskedB.tail, s"""$res\"$columnName\": ["$a", "$b"], """)
+        getDiff(maskedColumns.tail, maskedA.tail, maskedB.tail, res :+ ColumnsDiff(columnName = columnName, values = List(a.toString, b.toString)))
       }
     }
   }
@@ -106,7 +107,7 @@ object RowByRowAnalysis {
    * @return The JSON string representing the differences.
    */
   @tailrec
-  private def generateDiffJson(diffA: DataFrame, indexA: Int, diffB: DataFrame, name: String, res: String = "{"): String = {
+  private def generateDiffJson(diffA: DataFrame, indexA: Int, diffB: DataFrame, name: String, res: List[RowsDiff] = List()): String = {
     val rowA = diffA.head()
     val diffATail = diffA.except(diffA.limit(1))
 
@@ -122,9 +123,13 @@ object RowByRowAnalysis {
     val (maskedColumns, maskedA, maskedB) = getMasked(diffA, rowA, best.bestRowB, best.mask)
 
     logger.info("Computing the difference")
-    val diffForRow = s""""${hashA} ${hashB}":{ ${getDiff(maskedColumns, maskedA, maskedB)}}, \n"""
-    if (!diffATail.isEmpty) generateDiffJson(diffATail, indexA + 1, diffB, name, res + diffForRow)
-    else res + diffForRow + "}"
+    val diffForRow = RowsDiff(inputAHash = hashA.toString, inputBHash = hashB.toString, diffs = getDiff(maskedColumns, maskedA, maskedB))
+    if (!diffATail.isEmpty) generateDiffJson(diffATail, indexA + 1, diffB, name, res :+ diffForRow)
+    else {
+      implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW
+      implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
+      write(res :+ diffForRow)
+    }
   }
 
 
@@ -138,11 +143,6 @@ object RowByRowAnalysis {
    */
   def analyse(diffA: DataFrame, diffB: DataFrame): (String, String) = {
     logger.info("Row by row analysis")
-    if (diffA.isEmpty || diffB.isEmpty){
-      val resA = if (diffA.isEmpty) "\"All rows matched\"" else "\"There is no other row in B look to inputA_differences\""
-      val resB = if (diffB.isEmpty) "\"All rows matched\"" else "\"There is no other row in A look to inputB_differences\""
-      (s"""{"result": $resA}""", s"""{"result": $resB}""")
-    }
-    else (generateDiffJson(diffA, 0, diffB, "A") , generateDiffJson(diffB, 0, diffA, "B"))
+    (generateDiffJson(diffA, 0, diffB, "A") , generateDiffJson(diffB, 0, diffA, "B"))
   }
 }

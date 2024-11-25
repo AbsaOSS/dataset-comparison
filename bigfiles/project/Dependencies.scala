@@ -17,6 +17,7 @@ object Dependencies {
     val slf4jApi = "2.0.16"
     val logback = "1.2.3"
     val config = "1.4.3"
+    val unpickle = "3.3.1"
 
     val hadoop2 = "2.6.5"
     val hadoop3 = "3.3.5"
@@ -52,6 +53,8 @@ object Dependencies {
     lazy val slf4jApi = "org.slf4j" % "slf4j-api" % Versions.slf4jApi exclude("log4j", "log4j")
     lazy val config = "com.typesafe" % "config" % Versions.config
 
+    lazy val unpickle = "com.lihaoyi" %% "upickle" % Versions.unpickle
+
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
     // Required for scala 2.11 + spark 2.4.7
     lazy val snappy = "org.xerial.snappy" % "snappy-java" % "1.1.8.4"
@@ -63,6 +66,7 @@ object Dependencies {
       scopt,
       slf4jApi,
       config,
+      unpickle,
       jackson,
       snappy
     )

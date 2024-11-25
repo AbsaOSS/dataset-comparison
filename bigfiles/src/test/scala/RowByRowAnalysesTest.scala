@@ -1,15 +1,19 @@
 
+import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
 import africa.absa.cps.analysis.RowByRowAnalysis.analyse
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType}
 import org.json4s.native.JsonMethods.{compact, parse, render}
 import org.scalatest.funsuite.AnyFunSuite
+import upickle.default._
 
 
 class RowByRowAnalysesTest extends AnyFunSuite{
   implicit val spark: SparkSession = SparkTestSession.spark
   import spark.implicits._
+  implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW
+  implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
 //  spark.sparkContext.setLogLevel("DEBUG")
 
   test("test analyses multiple changes") {
@@ -25,17 +29,31 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 3.0, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-
     val diff = analyse(dataA, dataB)
-    val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"11133 19830\":{\"name\":[\"a\",\"b\"]}"))
-    assert(jsonStringA.contains("\"49840 29845\":{\"id\":[\"4\",\"2\"],\"value\":[\"4.0\",\"4.5\"]}") || jsonStringA.contains("\"49840 19830\":{\"id\":[\"4\",\"1\"],\"value\":[\"4.0\",\"3.0\"]}"))
-    assert(jsonStringA.contains("\"39950 39955\":{\"value\":[\"5.0\",\"3.0\"]}"))
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
 
-    val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"19830 11133\":{\"name\":[\"b\",\"a\"]}"))
-    assert(jsonStringB.contains("\"29845 49840\":{\"id\":[\"2\",\"4\"],\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"39955 39950\":{\"value\":[\"3.0\",\"5.0\"]}"))
+    assert(rowsDiffListA.length == 3)
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(
+        ColumnsDiff(columnName = "id", values = List("4", "2")),
+        ColumnsDiff(columnName = "value", values = List("4.0", "4.5")))))
+      ||
+      rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "19830", diffs = List(
+        ColumnsDiff(columnName = "id", values = List("4", "1")),
+        ColumnsDiff(columnName = "value", values = List("4.0", "3.0")))))
+    )
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "3.0"))))))
+
+
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+
+    assert(rowsDiffListB.length == 3)
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(
+      ColumnsDiff(columnName = "id", values = List("2", "4")),
+      ColumnsDiff(columnName = "value", values = List("4.5", "4.0")))))
+    )
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "39950", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "5.0"))))))
 
 
   }
@@ -53,15 +71,19 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val diff = analyse(dataA, dataB)
-    val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"11133 19830\":{\"value\":[\"3.0\",\"3.5\"]}"))
-    assert(jsonStringA.contains("\"49840 29845\":{\"value\":[\"4.0\",\"4.5\"]}"))
-    assert(jsonStringA.contains("\"39950 39955\":{\"value\":[\"5.0\",\"5.5\"]}"))
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
 
-    val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"19830 11133\":{\"value\":[\"3.5\",\"3.0\"]}"))
-    assert(jsonStringB.contains("\"29845 49840\":{\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"39955 39950\":{\"value\":[\"5.5\",\"5.0\"]}"))
+    assert(rowsDiffListA.length == 3)
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "5.5"))))))
+
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+
+    assert(rowsDiffListB.length == 3)
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "39950", diffs = List(ColumnsDiff(columnName = "value", values = List("5.5", "5.0"))))))
   }
 
   test("test analyses one change in different columns"){
@@ -79,49 +101,20 @@ class RowByRowAnalysesTest extends AnyFunSuite{
 
 
     val diff = analyse(dataA, dataB)
-    val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"11133 19830\":{\"name\":[\"a\",\"b\"]}"))
-    assert(jsonStringA.contains("\"49840 29845\":{\"value\":[\"4.0\",\"4.5\"]}"))
-    assert(jsonStringA.contains("\"39950 39955\":{\"id\":[\"3\",\"4\"]}"))
 
-    val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"19830 11133\":{\"name\":[\"b\",\"a\"]}"))
-    assert(jsonStringB.contains("\"29845 49840\":{\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"39955 39950\":{\"id\":[\"4\",\"3\"]}"))
-  }
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
 
-  test("test analyses one DataFrame is empty"){
-    val schema = StructType(Seq(
-      StructField("id", IntegerType, nullable = true),
-      StructField("name", StringType, nullable = true),
-      StructField("value", DoubleType, nullable = true),
-      StructField(HASH_COLUMN_NAME, StringType, nullable = true)
-    ))
+    assert(rowsDiffListA.length == 3)
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "id", values = List("3", "4"))))))
 
-    val dataA = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], schema)
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
 
-    val dataB = Seq(
-      (1, "b", 3.0, 19830),
-      (4, "b", 4.5, 29845),
-      (4, "c", 5.0, 39955)
-    ).toDF("id", "name", "value", HASH_COLUMN_NAME)
-
-
-    val diff = analyse(dataA, dataB)
-    val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA == "{\"result\":\"All rows matched\"}")
-
-    val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB == "{\"result\":\"There is no other row in A look to inputB_differences\"}")
-
-    val diffReverse = analyse(dataB, dataA)
-    val jsonStringBRe = compact(render(parse(diffReverse._1)))
-    assert(jsonStringBRe == "{\"result\":\"There is no other row in B look to inputA_differences\"}")
-
-    val jsonStringARe = compact(render(parse(diffReverse._2)))
-    assert(jsonStringARe == "{\"result\":\"All rows matched\"}")
-
-
+    assert(rowsDiffListB.length == 3)
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "39950", diffs = List(ColumnsDiff(columnName = "id", values = List("4", "3"))))))
   }
 
   test("test analyses one Dataframe is smaller than the other"){
@@ -137,15 +130,28 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val diff = analyse(dataA, dataB)
-    val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("\"11133 19830\":{\"value\":[\"3.0\",\"3.5\"]}"))
-    assert(jsonStringA.contains("\"49840 29845\":{\"value\":[\"4.0\",\"4.5\"]}"))
 
-    val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("\"19830 11133\":{\"value\":[\"3.5\",\"3.0\"]}"))
-    assert(jsonStringB.contains("\"29845 49840\":{\"value\":[\"4.5\",\"4.0\"]}"))
-    assert(jsonStringB.contains("\"39955 11133\":{\"id\":[\"3\",\"1\"],\"name\":[\"c\",\"a\"],\"value\":[\"5.5\",\"3.0\"]}") ||
-           jsonStringB.contains("\"39955 49840\":{\"id\":[\"3\",\"4\"],\"name\":[\"c\",\"b\"],\"value\":[\"5.5\",\"4.0\"]}"))
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
+
+    assert(rowsDiffListA.length == 2)
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
+
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+
+    assert(rowsDiffListB.length == 3)
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "11133", diffs = List(
+      ColumnsDiff(columnName = "id", values = List("3", "1")),
+      ColumnsDiff(columnName = "name", values = List("c", "a")),
+      ColumnsDiff(columnName = "value", values = List("5.5", "3.0"))))) ||
+      rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "49840", diffs = List(
+        ColumnsDiff(columnName = "id", values = List("3", "4")),
+        ColumnsDiff(columnName = "name", values = List("c", "b")),
+        ColumnsDiff(columnName = "value", values = List("5.5", "4.0")))))
+    )
+
   }
 
   test("test analyses no changes"){
@@ -162,11 +168,19 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val diff = analyse(dataA, dataB)
-    val jsonStringA = compact(render(parse(diff._1)))
-    assert(jsonStringA.contains("{\"11133 11133\":{},\"49840 49840\":{},\"39950 39950\":{}}"))
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
 
-    val jsonStringB = compact(render(parse(diff._2)))
-    assert(jsonStringB.contains("{\"11133 11133\":{},\"49840 49840\":{},\"39950 39950\":{}}"))
+    assert(rowsDiffListA.length == 3)
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "11133", diffs = List())))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "49840", diffs = List())))
+    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39950", diffs = List())))
+
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+
+    assert(rowsDiffListB.length == 3)
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "11133", inputBHash = "11133", diffs = List())))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "49840", inputBHash = "49840", diffs = List())))
+    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39950", inputBHash = "39950", diffs = List())))
   }
 
 
