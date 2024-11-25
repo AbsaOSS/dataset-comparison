@@ -128,7 +128,7 @@ object RowByRowAnalysis {
     else {
       implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW
       implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
-      write(res :+ diffForRow)
+      write(res :+ diffForRow, indent = 4)
     }
   }
 
