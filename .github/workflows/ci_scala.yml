@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Scala
         uses: olafurpg/setup-scala@v14
@@ -67,6 +69,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
