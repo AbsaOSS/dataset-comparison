@@ -2,7 +2,7 @@ package africa.absa.cps.analysis
 
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.slf4j.{Logger, LoggerFactory}
 import upickle.default._
 
@@ -20,7 +20,8 @@ object RowByRowAnalysis {
    * @param rowA The row from DataFrame A to compare.
    * @param diffB The DataFrame B to compare against.
    * @param stats The current best match statistics.
-   * @return best match statistics.
+   * @return best match statistics. This contains the best score, the best row from DataFrame B
+   *         and mask which has 0 and 1, 1 means the column is different.
    */
   @tailrec
   private def getBest(rowA: Row, diffB: DataFrame, stats: AnalyseStat): AnalyseStat = {
@@ -76,7 +77,8 @@ object RowByRowAnalysis {
   }
 
   /**
-   * Apply a mask to the columns of the DataFrame and rows A and B
+   * Apply the mask  that was created by getBest to the columns of the DataFrame and rows A and B.
+   * By applying the mask we will pick only the values that are different.
    * @param diffA The DataFrame A to compare.
    * @param rowA The current row in DataFrame A.
    * @param rowB The current row in DataFrame B.
@@ -109,7 +111,7 @@ object RowByRowAnalysis {
   @tailrec
   private def generateDiffJson(diffA: DataFrame, indexA: Int, diffB: DataFrame, name: String, res: List[RowsDiff] = List()): String = {
     val rowA = diffA.head()
-    val diffATail = diffA.except(diffA.limit(1))
+    val diffATail = diffA.filter(row => row != rowA)
 
     logger.info(s"Compute best match for row: ${rowA.toString()}")
     val best = getBest(rowA, diffB, AnalyseStat(bestScore = rowA.length + 1, mask = Seq[Int](), bestRowB = Row()))
@@ -124,14 +126,14 @@ object RowByRowAnalysis {
 
     logger.info("Computing the difference")
     val diffForRow = RowsDiff(inputAHash = hashA.toString, inputBHash = hashB.toString, diffs = getDiff(maskedColumns, maskedA, maskedB))
-    if (!diffATail.isEmpty) generateDiffJson(diffATail, indexA + 1, diffB, name, res :+ diffForRow)
-    else {
+    if (!diffATail.isEmpty) {
+      generateDiffJson(diffATail, indexA + 1, diffB, name, res :+ diffForRow)
+    } else {
       implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW
       implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
       write(res :+ diffForRow, indent = 4)
     }
   }
-
 
 
   /**
@@ -141,8 +143,8 @@ object RowByRowAnalysis {
    * @return A tuple containing the differences between the two DataFrames,
    *         one for difference A to B, second for B to A.
    */
-  def analyse(diffA: DataFrame, diffB: DataFrame): (String, String) = {
-    logger.info("Row by row analysis")
-    (generateDiffJson(diffA, 0, diffB, "A") , generateDiffJson(diffB, 0, diffA, "B"))
+  def analyse(diffA: DataFrame, diffB: DataFrame, name: String): String = {
+    logger.info(s"Row by row analysis for ${name}")
+    generateDiffJson(diffA, 0, diffB, name)
   }
 }

@@ -52,11 +52,12 @@ object DatasetComparison {
       }
       else {
         // compute diff
-        val diff = RowByRowAnalysis.analyse(uniqA, uniqB)
+        val diffA = RowByRowAnalysis.analyse(uniqA, uniqB, "A")
+        val diffB = RowByRowAnalysis.analyse(uniqB, uniqA, "B")
 
         // write diff
-        IOHandler.jsonWrite(Paths.get(out, "A_to_B_changes.json").toString, compact(render(parse(diff._1))))
-        IOHandler.jsonWrite(Paths.get(out, "B_to_A_changes.json").toString, compact(render(parse(diff._1))))
+        IOHandler.jsonWrite(Paths.get(out, "A_to_B_changes.json").toString, diffA)
+        IOHandler.jsonWrite(Paths.get(out, "B_to_A_changes.json").toString, diffB)
       }
     }
     else if (arguments.diff == DiffComputeType.Row){

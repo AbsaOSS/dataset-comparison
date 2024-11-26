@@ -29,8 +29,9 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 3.0, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val diff = analyse(dataA, dataB)
-    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
+    val diffA = analyse(dataA, dataB, "A")
+    val diffB = analyse(dataB, dataA, "B")
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diffA)
 
     assert(rowsDiffListA.length == 3)
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
@@ -45,7 +46,7 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "3.0"))))))
 
 
-    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diffB)
 
     assert(rowsDiffListB.length == 3)
     assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
@@ -70,15 +71,16 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 5.5, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val diff = analyse(dataA, dataB)
-    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
+    val diffA = analyse(dataA, dataB, "A")
+    val diffB = analyse(dataB, dataA, "B")
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diffA)
 
     assert(rowsDiffListA.length == 3)
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "5.5"))))))
 
-    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diffB)
 
     assert(rowsDiffListB.length == 3)
     assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
@@ -100,16 +102,17 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
 
-    val diff = analyse(dataA, dataB)
+    val diffA = analyse(dataA, dataB, "A")
+    val diffB = analyse(dataB, dataA, "B")
 
-    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diffA)
 
     assert(rowsDiffListA.length == 3)
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "id", values = List("3", "4"))))))
 
-    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diffB)
 
     assert(rowsDiffListB.length == 3)
     assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
@@ -129,15 +132,16 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 5.5, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val diff = analyse(dataA, dataB)
+    val diffA = analyse(dataA, dataB, "A")
+    val diffB = analyse(dataB, dataA, "B")
 
-    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diffA)
 
     assert(rowsDiffListA.length == 2)
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
 
-    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diffB)
 
     assert(rowsDiffListB.length == 3)
     assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
@@ -167,15 +171,16 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 5.0, 39950)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val diff = analyse(dataA, dataB)
-    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diff._1)
+    val diffA = analyse(dataA, dataB, "A")
+    val diffB = analyse(dataB, dataA, "B")
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](diffA)
 
     assert(rowsDiffListA.length == 3)
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "11133", diffs = List())))
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "49840", diffs = List())))
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39950", diffs = List())))
 
-    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diff._2)
+    val rowsDiffListB: List[RowsDiff] = read[List[RowsDiff]](diffB)
 
     assert(rowsDiffListB.length == 3)
     assert(rowsDiffListB.contains(RowsDiff(inputAHash = "11133", inputBHash = "11133", diffs = List())))
