@@ -3,8 +3,6 @@ import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
 import africa.absa.cps.analysis.RowByRowAnalysis.analyse
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.{Row, SparkSession}
-import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType}
-import org.json4s.native.JsonMethods.{compact, parse, render}
 import org.scalatest.funsuite.AnyFunSuite
 import upickle.default._
 
@@ -118,7 +116,7 @@ class RowByRowAnalysesTest extends AnyFunSuite{
   test("test analyses one Dataframe is smaller than the other"){
     val dataA = Seq(
       (1, "a", 3.0, 11133),
-      (4, "b", 4.0, 49840),
+      (4, "b", 4.0, 49840)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
     val dataB = Seq(
