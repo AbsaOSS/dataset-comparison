@@ -8,14 +8,14 @@ object Dependencies {
     val spark2 = "2.4.7"
 
     val jackson211_212 = "2.17.2"
-    val json35 = "3.5.3"
-    val json36 = "3.6.6"
+    val json35         = "3.5.3"
+    val json36         = "3.6.6"
 
-    val fansi = "0.4.0"
+    val fansi     = "0.4.0"
     val scalatest = "3.2.19"
-    val scopt = "4.1.0"
-    val slf4jApi = "2.0.16"
-    val logback = "1.2.3"
+    val scopt     = "4.1.0"
+    val slf4jApi  = "2.0.16"
+    val logback   = "1.2.3"
 
     val hadoop2 = "2.6.5"
     val hadoop3 = "3.3.5"
@@ -46,12 +46,12 @@ object Dependencies {
   }
 
   def bigfilesDependencies: Seq[ModuleID] = {
-    lazy val fansi = "com.lihaoyi" %% "fansi" % Versions.fansi
-    lazy val scopt = "com.github.scopt" %% "scopt" % Versions.scopt
-    lazy val slf4jApi = "org.slf4j" % "slf4j-api" % Versions.slf4jApi exclude("log4j", "log4j")
-    lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
+    lazy val fansi     = "com.lihaoyi"      %% "fansi"     % Versions.fansi
+    lazy val scopt     = "com.github.scopt" %% "scopt"     % Versions.scopt
+    lazy val slf4jApi  = "org.slf4j"         % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
+    lazy val scalatest = "org.scalatest"    %% "scalatest" % Versions.scalatest % Test
     // Required for scala 2.11 + spark 2.4.7
-    lazy val snappy = "org.xerial.snappy" % "snappy-java" % "1.1.8.4"
+    lazy val snappy  = "org.xerial.snappy"             % "snappy-java"          % "1.1.8.4"
     lazy val jackson = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Versions.jackson211_212 % Provided
 
     Seq(
