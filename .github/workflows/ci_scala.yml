@@ -22,17 +22,19 @@ jobs:
             scalaShort: "2.11"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: "adopt@1.8"
 
       - name: Build and run tests
         continue-on-error: true
         id: jacocorun
-        run: sbt jacoco
+        run: sbt ++${{ matrix.scala }} jacoco
 
       - name: Add coverage to PR
         if: steps.jacocorun.outcome == 'success'
@@ -58,7 +60,6 @@ jobs:
           script: |
             core.setFailed('Changed files coverage is less than ${{ env.changed }}%!')
 
-
   format-check:
     name: Format Check
     runs-on: ubuntu-latest
@@ -67,13 +68,15 @@ jobs:
         working-directory: bigfiles
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: "adopt@1.8"
 

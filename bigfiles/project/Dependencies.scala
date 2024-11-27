@@ -8,11 +8,12 @@ object Dependencies {
     val spark2 = "2.4.7"
 
     val jackson211_212 = "2.17.2"
-    val json35 = "3.5.3"
-    val json36 = "3.6.6"
+    val json35         = "3.5.3"
+    val json36         = "3.6.6"
 
-    val fansi = "0.4.0"
+    val fansi     = "0.4.0"
     val scalatest = "3.2.19"
+    
     val scopt = "4.1.0"
     val slf4jApi = "2.0.16"
     val logback = "1.2.3"
@@ -56,8 +57,9 @@ object Dependencies {
     lazy val unpickle = "com.lihaoyi" %% "upickle" % Versions.unpickle
 
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
+
     // Required for scala 2.11 + spark 2.4.7
-    lazy val snappy = "org.xerial.snappy" % "snappy-java" % "1.1.8.4"
+    lazy val snappy  = "org.xerial.snappy"             % "snappy-java"          % "1.1.8.4"
     lazy val jackson = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Versions.jackson211_212 % Provided
 
     Seq(

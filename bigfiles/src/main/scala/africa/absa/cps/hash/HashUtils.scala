@@ -10,25 +10,27 @@ object HashUtils {
   val HASH_COLUMN_NAME = "cps_comparison_hash"
 
   private val logger: Logger = LoggerFactory.getLogger(HashUtils.getClass)
-  private val hashUDF = udf((row: Row) => hashRow(row))
+  private val hashUDF        = udf((row: Row) => hashRow(row))
 
-  /**
-   * Hash a row
-   *
-   * @param row Row to hash
-   * @return Hash of the row
-   */
+  /** Hash a row
+    *
+    * @param row
+    *   Row to hash
+    * @return
+    *   Hash of the row
+    */
   private def hashRow(row: Row): Int = row.mkString.hashCode
 
-  /**
-   * Hash the dataframe
-   *
-   * @param df DataFrame to hash
-   * @return DataFrame with hash column
-   */
+  /** Hash the dataframe
+    *
+    * @param df
+    *   DataFrame to hash
+    * @return
+    *   DataFrame with hash column
+    */
   def createHashColumn(df: DataFrame): DataFrame = {
     logger.info("Hashing the dataframe")
-    df.withColumn(HASH_COLUMN_NAME , hashUDF(struct(df.columns.map(col): _*)))
+    df.withColumn(HASH_COLUMN_NAME, hashUDF(struct(df.columns.map(col): _*)))
   }
 
 }
