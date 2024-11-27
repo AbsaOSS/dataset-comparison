@@ -109,7 +109,7 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
       )
     )
 
-    IOHandler.rowDiffWriteAsJson(jsonPath, data)
+    IOHandler.rowDiffWriteAsJson(Paths.get(jsonPath).toString, data)
 
     val source = Source.fromFile(jsonPath)
     val jsonString = try source.mkString finally source.close()

@@ -80,5 +80,5 @@ jobs:
           java-version: "adopt@1.8"
 
       - name: Run scalafmt And Print Diff
-        continue-on-error: true
+        continue-on-error: false
         run: sbt scalafmt scalafmtSbt && git diff --exit-code
