@@ -14,15 +14,15 @@ First run assembly: `sbt assembly`
 Then run:
 
 ```bash
-spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>  --fsURI <uri.to.fs>
+spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>
 ```
 
 ### Run with specific config 
 
 ```bash
-spark-submit --class africa.absa.cps.DatasetComparison --conf "spark.driver.extraJavaOptions=-Dconfig.file=/path/to/application.conf" target/scala-2.12/dataset-comparison-assembly-0.1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>  --fsURI <uri.to.fs> -d Row
+spark-submit --class africa.absa.cps.DatasetComparison --conf "spark.driver.extraJavaOptions=-Dconfig.file=/path/to/application.conf" target/scala-2.12/dataset-comparison-assembly-0.1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path> -d Row
 ```
-
+`-d Row` is optional parameter for detailed analyses that specifies which analyses to use. Now it can be only `Row`
 ### Spark configuration
 you can set spark configuration in `spark-defaults.conf` file it is stored in `$SPARK_HOME/conf` directory
 You will found there `spark-defaults.conf.template` remove `.template` from the file name and set your configuration there.
