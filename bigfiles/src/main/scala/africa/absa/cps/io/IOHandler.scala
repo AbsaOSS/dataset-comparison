@@ -7,6 +7,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.ByteArrayInputStream
+import java.nio.file.{Files, Paths}
 
 object IOHandler {
 
@@ -75,7 +76,9 @@ object IOHandler {
     implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW // Required for upickle
     implicit val RowDiffRw: ReadWriter[RowsDiff]        = macroRW
     val diffJson                                        = write(diff, indent = 4)
-    jsonWrite(filePath, diffJson)
+//    jsonWrite(filePath, diffJson)
+    Files.write(Paths.get(filePath), diffJson.getBytes)
+    logger.info(s"Saved to $filePath")
   }
 
 }

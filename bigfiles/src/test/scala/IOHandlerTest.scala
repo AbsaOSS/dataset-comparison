@@ -118,8 +118,7 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
 
     val source = Source.fromFile(jsonPath)
     val jsonString = try source.mkString finally source.close()
-
-     val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](jsonString)
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](jsonString)
     assert(rowsDiffListA.length == 2)
     assert(rowsDiffListA.contains(RowsDiff(inputAHash = "hash1", inputBHash = "hash2", diffs = List(
       ColumnsDiff(columnName = "id", values = List("1", "2")),
