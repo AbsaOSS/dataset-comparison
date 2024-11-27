@@ -27,7 +27,8 @@ lazy val root = (project in file("."))
       "org.json4s"       %% "json4s-jackson" % jsonVersionForScala(scalaVersion.value),
       "org.apache.hadoop" % "hadoop-common"  % hadoopVersionForScala(scalaVersion.value),
       "org.apache.hadoop" % "hadoop-client"  % hadoopVersionForScala(scalaVersion.value),
-      "org.apache.hadoop" % "hadoop-hdfs"    % hadoopVersionForScala(scalaVersion.value)
+      "org.apache.hadoop" % "hadoop-hdfs"    % hadoopVersionForScala(scalaVersion.value),
+      "com.lihaoyi"      %% "upickle"        % unpickleVersionForScala(scalaVersion.value),
     ),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
     Test / fork          := true,

@@ -13,12 +13,13 @@ object Dependencies {
 
     val fansi     = "0.4.0"
     val scalatest = "3.2.19"
-    
+
     val scopt = "4.1.0"
     val slf4jApi = "2.0.16"
     val logback = "1.2.3"
     val config = "1.4.3"
-    val unpickle = "3.3.1"
+    val upickle3 = "3.3.1"
+    val upickle1 = "1.4.0"
 
     val hadoop2 = "2.6.5"
     val hadoop3 = "3.3.5"
@@ -48,13 +49,19 @@ object Dependencies {
     }
   }
 
+  def unpickleVersionForScala(scalaVersion: String): String = {
+    scalaVersion match {
+      case _ if scalaVersion.startsWith("2.11") => Versions.upickle1
+      case _ if scalaVersion.startsWith("2.12") => Versions.upickle3
+      case _ => throw new IllegalArgumentException("Only Scala 2.11 and 2.12 are currently supported.")
+    }
+  }
+
   def bigfilesDependencies: Seq[ModuleID] = {
     lazy val fansi = "com.lihaoyi" %% "fansi" % Versions.fansi
     lazy val scopt = "com.github.scopt" %% "scopt" % Versions.scopt
     lazy val slf4jApi = "org.slf4j" % "slf4j-api" % Versions.slf4jApi exclude("log4j", "log4j")
     lazy val config = "com.typesafe" % "config" % Versions.config
-
-    lazy val unpickle = "com.lihaoyi" %% "upickle" % Versions.unpickle
 
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
 
@@ -68,7 +75,6 @@ object Dependencies {
       scopt,
       slf4jApi,
       config,
-      unpickle,
       jackson,
       snappy
     )
