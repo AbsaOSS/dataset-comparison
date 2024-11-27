@@ -106,10 +106,10 @@ object RowByRowAnalysis {
    * @param diffB The DataFrame B to compare against.
    * @param name The name identifier for the DataFrame.
    * @param res The accumulated result string.
-   * @return The JSON string representing the differences.
+   * @return The List[RowsDiff] representing the differences.
    */
   @tailrec
-  private def generateDiffJson(diffA: DataFrame, indexA: Int, diffB: DataFrame, name: String, res: List[RowsDiff] = List()): String = {
+  private def generateDiffJson(diffA: DataFrame, indexA: Int, diffB: DataFrame, name: String, res: List[RowsDiff] = List()): List[RowsDiff] = {
     val rowA = diffA.head()
     val diffATail = diffA.filter(row => row != rowA)
 
@@ -129,9 +129,7 @@ object RowByRowAnalysis {
     if (!diffATail.isEmpty) {
       generateDiffJson(diffATail, indexA + 1, diffB, name, res :+ diffForRow)
     } else {
-      implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW
-      implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
-      write(res :+ diffForRow, indent = 4)
+      res :+ diffForRow
     }
   }
 
@@ -140,10 +138,10 @@ object RowByRowAnalysis {
    * Analyse the differences between two DataFrames
    * @param diffA The DataFrame A to compare.
    * @param diffB  The DataFrame B to compare against.
-   * @return A tuple containing the differences between the two DataFrames,
-   *         one for difference A to B, second for B to A.
+   * @return List[RowsDiff] containing the differences between the two DataFrames A to B.
+   *
    */
-  def analyse(diffA: DataFrame, diffB: DataFrame, name: String): String = {
+  def analyse(diffA: DataFrame, diffB: DataFrame, name: String): List[RowsDiff] = {
     logger.info(s"Row by row analysis for ${name}")
     generateDiffJson(diffA, 0, diffB, name)
   }

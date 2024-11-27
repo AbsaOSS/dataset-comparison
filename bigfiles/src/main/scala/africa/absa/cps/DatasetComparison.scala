@@ -59,8 +59,8 @@ object DatasetComparison {
         val diffB = RowByRowAnalysis.analyse(uniqB, uniqA, "B")
 
         // write diff
-        IOHandler.jsonWrite(Paths.get(out, "A_to_B_changes.json").toString, diffA)
-        IOHandler.jsonWrite(Paths.get(out, "B_to_A_changes.json").toString, diffB)
+        IOHandler.rowDiffWriteAsJson(Paths.get(out, "A_to_B_changes.json").toString, diffA)
+        IOHandler.rowDiffWriteAsJson(Paths.get(out, "B_to_A_changes.json").toString, diffB)
       }
     }
     else if (arguments.diff == DiffComputeType.Row){
