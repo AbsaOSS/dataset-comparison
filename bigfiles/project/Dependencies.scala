@@ -14,10 +14,10 @@ object Dependencies {
     val fansi     = "0.4.0"
     val scalatest = "3.2.19"
 
-    val scopt = "4.1.0"
+    val scopt    = "4.1.0"
     val slf4jApi = "2.0.16"
-    val logback = "1.2.3"
-    val config = "1.4.3"
+    val logback  = "1.2.3"
+    val config   = "1.4.3"
     val upickle3 = "3.3.1"
     val upickle1 = "1.4.0"
 
@@ -58,10 +58,10 @@ object Dependencies {
   }
 
   def bigfilesDependencies: Seq[ModuleID] = {
-    lazy val fansi = "com.lihaoyi" %% "fansi" % Versions.fansi
-    lazy val scopt = "com.github.scopt" %% "scopt" % Versions.scopt
-    lazy val slf4jApi = "org.slf4j" % "slf4j-api" % Versions.slf4jApi exclude("log4j", "log4j")
-    lazy val config = "com.typesafe" % "config" % Versions.config
+    lazy val fansi    = "com.lihaoyi"      %% "fansi"     % Versions.fansi
+    lazy val scopt    = "com.github.scopt" %% "scopt"     % Versions.scopt
+    lazy val slf4jApi = "org.slf4j"         % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
+    lazy val config   = "com.typesafe"      % "config"    % Versions.config
 
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
 

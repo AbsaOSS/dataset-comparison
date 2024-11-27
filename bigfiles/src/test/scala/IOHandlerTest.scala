@@ -109,6 +109,11 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
       )
     )
 
+    val dir = new File(folder)
+    if (!dir.exists()) {
+      dir.mkdirs()
+    }
+
     IOHandler.rowDiffWriteAsJson(Paths.get(jsonPath).toString, data)
 
     val source = Source.fromFile(jsonPath)

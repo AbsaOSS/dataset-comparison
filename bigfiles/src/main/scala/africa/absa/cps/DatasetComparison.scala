@@ -34,7 +34,6 @@ object DatasetComparison {
 
     val (uniqA, uniqB) = Comparator.compare(dataA, dataB)
 
-
     val metrics: String = Comparator.createMetrics(dataA, dataB, uniqA, uniqB, arguments.exclude)
 
     // write to files
@@ -44,16 +43,17 @@ object DatasetComparison {
     IOHandler.jsonWrite(Paths.get(out, "metrics.json").toString, metrics)
 
     // read config
-    val conf = ConfigFactory.load()
+    val conf      = ConfigFactory.load()
     val threshold = conf.getInt("dataset-comparison.analysis.diff-threshold")
 
     if (arguments.diff == DiffComputeType.Row && uniqA.count() <= threshold && uniqB.count() <= threshold) {
-      if (uniqA.isEmpty || uniqB.isEmpty){
-        val resA = if (uniqA.isEmpty) "\"All rows matched\"" else "\"There is no other row in B look to inputA_differences\""
-        val resB = if (uniqB.isEmpty) "\"All rows matched\"" else "\"There is no other row in A look to inputB_differences\""
+      if (uniqA.isEmpty || uniqB.isEmpty) {
+        val resA =
+          if (uniqA.isEmpty) "\"All rows matched\"" else "\"There is no other row in B look to inputA_differences\""
+        val resB =
+          if (uniqB.isEmpty) "\"All rows matched\"" else "\"There is no other row in A look to inputB_differences\""
         logger.info(s"Detailed analysis will not be computed: \nA: $resA\nB: $resB")
-      }
-      else {
+      } else {
         // compute diff
         val diffA = RowByRowAnalysis.analyse(uniqA, uniqB, "A")
         val diffB = RowByRowAnalysis.analyse(uniqB, uniqA, "B")
@@ -62,8 +62,7 @@ object DatasetComparison {
         IOHandler.rowDiffWriteAsJson(Paths.get(out, "A_to_B_changes.json").toString, diffA)
         IOHandler.rowDiffWriteAsJson(Paths.get(out, "B_to_A_changes.json").toString, diffB)
       }
-    }
-    else if (arguments.diff == DiffComputeType.Row){
+    } else if (arguments.diff == DiffComputeType.Row) {
       logger.warn("The number of differences is too large to compute row by row differences.")
     }
   }
