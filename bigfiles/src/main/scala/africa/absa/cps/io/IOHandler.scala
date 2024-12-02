@@ -70,13 +70,12 @@ object IOHandler {
     *
     * ColumnsDiffRw are required for upickle, when write is used on List[RowsDiff] it will call write on ColumnsDiff
     */
-  def rowDiffWriteAsJson(filePath: String, diff: List[RowsDiff])(implicit spark: SparkSession): Unit = {
+  def rowDiffWriteAsJson(filePath: String, diff: Seq[RowsDiff])(implicit spark: SparkSession): Unit = {
     logger.info(s"Saving row diff to $filePath")
     import upickle.default._
     implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW // Required for upickle
     implicit val RowDiffRw: ReadWriter[RowsDiff]        = macroRW
     val diffJson                                        = write(diff, indent = 4)
-//    jsonWrite(filePath, diffJson)
     Files.write(Paths.get(filePath), diffJson.getBytes)
     logger.info(s"Saved to $filePath")
   }

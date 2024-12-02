@@ -3,6 +3,7 @@ package africa.absa.cps
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
 import hash.HashUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.json4s.JsonAST
 import org.json4s.native.JsonMethods.{compact, render}
 import org.json4s.JsonDSL._
 import org.slf4j.{Logger, LoggerFactory}
@@ -47,7 +48,7 @@ object Comparator {
     val diffCountB    = diffB.count()
     val sameRecords   = if (rowCountA - diffCountA == rowCountB - diffCountB) rowCountA - diffCountA else -1
 
-    val metricsJson =
+    val metricsJson: JsonAST.JObject =
       ("A" ->
         ("row count"             -> rowCountA) ~
         ("column count"          -> dataA.columns.length) ~

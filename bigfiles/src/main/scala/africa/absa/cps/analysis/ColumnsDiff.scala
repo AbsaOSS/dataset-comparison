@@ -1,3 +1,3 @@
 package africa.absa.cps.analysis
 
-case class ColumnsDiff(columnName: String = "", values: List[String] = List())
+case class ColumnsDiff(columnName: String = "N/A", values: Seq[String] = Seq.empty)
