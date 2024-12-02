@@ -14,7 +14,7 @@ object DatasetComparison {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]): Unit = {
-    val conf = ConfigFactory.load()
+    val conf      = ConfigFactory.load()
     val threshold = conf.getInt("dataset-comparison.analysis.diff-threshold")
 
     val arguments = ArgsParser.getArgs(args)
@@ -28,8 +28,8 @@ object DatasetComparison {
     ArgsParser.validate(arguments)
 
     // read data
-    val rawDataA = IOHandler.sparkRead(arguments.inputA)
-    val rawDataB = IOHandler.sparkRead(arguments.inputB)
+    val rawDataA         = IOHandler.sparkRead(arguments.inputA)
+    val rawDataB         = IOHandler.sparkRead(arguments.inputB)
     val dataA: DataFrame = DatasetComparisonHelper.exclude(rawDataA, arguments.exclude, "A")
     val dataB: DataFrame = DatasetComparisonHelper.exclude(rawDataB, arguments.exclude, "B")
 
@@ -47,13 +47,14 @@ object DatasetComparison {
     val uniqBEmpty = uniqB.isEmpty
     arguments.diff match {
       case _ if uniqBEmpty || uniqAEmpty => logEitherUniqEmpty(uniqAEmpty, uniqBEmpty)
-      case DiffComputeType.Row => handleRowDiffType(uniqA, uniqB, out, threshold)
-      case _ => logger.info("None DiffComputeType selected")
+      case DiffComputeType.Row           => handleRowDiffType(uniqA, uniqB, out, threshold)
+      case _                             => logger.info("None DiffComputeType selected")
     }
   }
 
-  private def handleRowDiffType(uniqA: DataFrame, uniqB: DataFrame, out: String, threshold: Int)
-                               (implicit sparkSession: SparkSession): Unit = {
+  private def handleRowDiffType(uniqA: DataFrame, uniqB: DataFrame, out: String, threshold: Int)(implicit
+      sparkSession: SparkSession
+  ): Unit = {
     if (uniqA.count() <= threshold && uniqB.count() <= threshold) {
       val diffA = RowByRowAnalysis.generateDiffJson(uniqA, uniqB, "A")
       val diffB = RowByRowAnalysis.generateDiffJson(uniqB, uniqA, "B")
@@ -65,7 +66,6 @@ object DatasetComparison {
       logger.warn("The number of differences is too large to compute row by row differences.")
     }
   }
-
 
   private def logEitherUniqEmpty(uniqAEmpty: Boolean, uniqBEmpty: Boolean): Unit = {
     logger.info(

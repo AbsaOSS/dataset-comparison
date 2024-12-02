@@ -17,27 +17,34 @@ object RowByRowAnalysis {
     *   The row from DataFrame Left to compare.
     * @param diffRight
     *   The DataFrame Right to compare against.
-    * @param bestScore score of difference between two rows, starts on  row length +1
-    * @param mask it is a sequence of 0 and 1, where 0 means no difference and 1 means difference.
-    *              Then you can pick just different rows on behalf of this mask.
-    * @param bestRowRight  represents the best row from Right DataFrame that is the closest to the row from Left DataFrame.
+    * @param bestScore
+    *   score of difference between two rows, starts on row length +1
+    * @param mask
+    *   it is a sequence of 0 and 1, where 0 means no difference and 1 means difference. Then you can pick just
+    *   different rows on behalf of this mask.
+    * @param bestRowRight
+    *   represents the best row from Right DataFrame that is the closest to the row from Left DataFrame.
     * @return
-    *   best match statistics. This contains the best score, the best row from DataFrame Right and mask which has 0 and 1, 1
-    *   means the column is different. Mask represents the comparison between two rows where 0 means they are the same,
-    *    while 1 means they differ. The sequence then gives the representation of the whole row of differences.
+    *   best match statistics. This contains the best score, the best row from DataFrame Right and mask which has 0 and
+    *   1, 1 means the column is different. Mask represents the comparison between two rows where 0 means they are the
+    *   same, while 1 means they differ. The sequence then gives the representation of the whole row of differences.
     */
   @tailrec
-  private def getBest(rowLeft: Row,
-                      diffRight: DataFrame,
-                      bestScore: Int,
-                      mask: Seq[Int] = Seq.empty,
-                      bestRowRight: Row = Row.empty): AnalyseStat = {
+  private def getBest(
+      rowLeft: Row,
+      diffRight: DataFrame,
+      bestScore: Int,
+      mask: Seq[Int] = Seq.empty,
+      bestRowRight: Row = Row.empty
+  ): AnalyseStat = {
     logger.debug("Get the current row from DataFrame Right")
-    val rowRight = diffRight.head()
-    val hashRight = rowRight.getAs[Int](HASH_COLUMN_NAME)
+    val rowRight      = diffRight.head()
+    val hashRight     = rowRight.getAs[Int](HASH_COLUMN_NAME)
     val diffRightTail = diffRight.filter(col(HASH_COLUMN_NAME).notEqual(hashRight))
 
-    logger.debug(s"Calculate the difference score between rowLeft ${rowLeft.toString()} and rowRight ${rowRight.toString()}")
+    logger.debug(
+      s"Calculate the difference score between rowLeft ${rowLeft.toString()} and rowRight ${rowRight.toString()}"
+    )
     val diff  = rowLeft.toSeq.zip(rowRight.toSeq).map { case (a, b) => if (a == b) 0 else 1 }
     val score = diff.sum
 
@@ -57,9 +64,10 @@ object RowByRowAnalysis {
 
   }
 
-  /** Apply the mask that was created by getBest to provided sequence. By applying the mask
-    * we will pick only the values that are different.
-    * @param data sequence on which mask should be apply
+  /** Apply the mask that was created by getBest to provided sequence. By applying the mask we will pick only the values
+    * that are different.
+    * @param data
+    *   sequence on which mask should be apply
     * @param mask
     *   The mask to apply.
     * @return
@@ -82,7 +90,7 @@ object RowByRowAnalysis {
     * @param res
     *   The accumulated result string.
     * @return
-    *    Seq[RowsDiff] containing the differences between the two DataFrames Left to Right.
+    *   Seq[RowsDiff] containing the differences between the two DataFrames Left to Right.
     */
   @tailrec
   def generateDiffJson(
@@ -92,30 +100,33 @@ object RowByRowAnalysis {
       indexLeft: Int = 0,
       res: Seq[RowsDiff] = Seq.empty
   ): Seq[RowsDiff] = {
-    val rowLeft = diffLeft.head()
-    val hashLeft = rowLeft.getAs[Int](HASH_COLUMN_NAME)
+    val rowLeft      = diffLeft.head()
+    val hashLeft     = rowLeft.getAs[Int](HASH_COLUMN_NAME)
     val diffLeftTail = diffLeft.filter(col(HASH_COLUMN_NAME).notEqual(hashLeft))
 
     logger.info(s"Compute best match for row: ${rowLeft.toString()}")
     val best: AnalyseStat = getBest(rowLeft, diffRight, rowLeft.length + 1)
 
-    logger.debug(s"${best.bestScore} score for row $rowLeft in $name, row Right ${best.bestRowRight}, mask ${best.mask}\n")
+    logger.debug(
+      s"${best.bestScore} score for row $rowLeft in $name, row Right ${best.bestRowRight}, mask ${best.mask}\n"
+    )
     logger.info("Get the hash values for the rows")
     val hashRight = best.bestRowRight.getAs[Int](HASH_COLUMN_NAME)
 
     logger.info("Applying mask to columns")
     val diffsColumns = getDifferencesByMask(diffLeft.columns, best.mask)
-    val diffsLeft = getDifferencesByMask(rowLeft.toSeq,best.mask)
-    val diffsRight = getDifferencesByMask(best.bestRowRight.toSeq, best.mask)
+    val diffsLeft    = getDifferencesByMask(rowLeft.toSeq, best.mask)
+    val diffsRight   = getDifferencesByMask(best.bestRowRight.toSeq, best.mask)
 
     logger.info("Computing the difference")
     val diffs = diffsColumns.zip(diffsLeft.zip(diffsRight)).collect {
-      case (columnName, (valLeft, valRight)) if columnName != HASH_COLUMN_NAME => ColumnsDiff(columnName, Seq(valLeft.toString, valRight.toString))
+      case (columnName, (valLeft, valRight)) if columnName != HASH_COLUMN_NAME =>
+        ColumnsDiff(columnName, Seq(valLeft.toString, valRight.toString))
     }
     val diffForRow = RowsDiff(hashLeft.toString, hashRight.toString, diffs)
 
     if (!diffLeftTail.isEmpty) {
-      generateDiffJson(diffLeftTail, diffRight, name, indexLeft + 1,  res :+ diffForRow)
+      generateDiffJson(diffLeftTail, diffRight, name, indexLeft + 1, res :+ diffForRow)
     } else {
       res :+ diffForRow
     }
