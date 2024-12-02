@@ -9,6 +9,6 @@ import org.apache.spark.sql.Row
  *                  the worst is the number of columns.
  * @param mask it is a sequence of 0 and 1, where 0 means no difference and 1 means difference.
  *             Then you can pick just different rows on behalf of this mask.
- * @param bestRowB represents the best row from Right DataFrame that is the closest to the row from Left DataFrame.
+ * @param bestRowRight represents the best row from Right DataFrame that is the closest to the row from Left DataFrame.
  */
- case class AnalyseStat(bestScore: Int, mask: Seq[Int], bestRowB: Row)
+ case class AnalyseStat(bestScore: Int, mask: Seq[Int], bestRowRight: Row)
