@@ -82,14 +82,14 @@ object RowByRowAnalysis {
     * @param res
     *   The accumulated result string.
     * @return
-    *   The Seq[RowsDiff] representing the differences.
+    *    Seq[RowsDiff] containing the differences between the two DataFrames Left to Right.
     */
   @tailrec
-  private def generateDiffJson(
+  def generateDiffJson(
       diffLeft: DataFrame,
-      indexLeft: Int,
       diffRight: DataFrame,
       name: String,
+      indexLeft: Int = 0,
       res: Seq[RowsDiff] = Seq.empty
   ): Seq[RowsDiff] = {
     val rowLeft = diffLeft.head()
@@ -115,22 +115,10 @@ object RowByRowAnalysis {
     val diffForRow = RowsDiff(hashLeft.toString, hashRight.toString, diffs)
 
     if (!diffLeftTail.isEmpty) {
-      generateDiffJson(diffLeftTail, indexLeft + 1, diffRight, name, res :+ diffForRow)
+      generateDiffJson(diffLeftTail, diffRight, name, indexLeft + 1,  res :+ diffForRow)
     } else {
       res :+ diffForRow
     }
   }
 
-  /** Analyse the differences between two DataFrames, runs generateDiffJson with index 0
-    * @param diffLeft
-    *   The DataFrame Left to compare.
-    * @param diffRight
-    *   The DataFrame Right to compare against.
-    * @return
-    *   Seq[RowsDiff] containing the differences between the two DataFrames Left to Right.
-    */
-  def analyse(diffLeft: DataFrame, diffRight: DataFrame, name: String): Seq[RowsDiff] = {
-    logger.info(s"Row by row analysis for $name")
-    generateDiffJson(diffLeft, 0, diffRight, name)
-  }
 }
