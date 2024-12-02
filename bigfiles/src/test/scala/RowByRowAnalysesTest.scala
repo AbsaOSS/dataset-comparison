@@ -2,7 +2,7 @@
 import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
 import africa.absa.cps.analysis.RowByRowAnalysis.analyse
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.scalatest.funsuite.AnyFunSuite
 import upickle.default._
 
@@ -32,25 +32,25 @@ class RowByRowAnalysesTest extends AnyFunSuite{
 
 
     assert(rowsDiffListA.length == 3)
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "11133", inputRightHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "49840", inputRightHash = "29845", diffs = List(
         ColumnsDiff(columnName = "id", values = List("4", "2")),
         ColumnsDiff(columnName = "value", values = List("4.0", "4.5")))))
       ||
-      rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "19830", diffs = List(
+      rowsDiffListA.contains(RowsDiff(inputLeftHash = "49840", inputRightHash = "19830", diffs = List(
         ColumnsDiff(columnName = "id", values = List("4", "1")),
         ColumnsDiff(columnName = "value", values = List("4.0", "3.0")))))
     )
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "3.0"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "39950", inputRightHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "3.0"))))))
 
 
     assert(rowsDiffListB.length == 3)
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "19830", inputRightHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "29845", inputRightHash = "49840", diffs = List(
       ColumnsDiff(columnName = "id", values = List("2", "4")),
       ColumnsDiff(columnName = "value", values = List("4.5", "4.0")))))
     )
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "39950", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "5.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "39955", inputRightHash = "39950", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "5.0"))))))
 
 
   }
@@ -72,15 +72,15 @@ class RowByRowAnalysesTest extends AnyFunSuite{
 
 
     assert(rowsDiffListA.length == 3)
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "5.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "11133", inputRightHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "49840", inputRightHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "39950", inputRightHash = "39955", diffs = List(ColumnsDiff(columnName = "value", values = List("5.0", "5.5"))))))
 
 
     assert(rowsDiffListB.length == 3)
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "39950", diffs = List(ColumnsDiff(columnName = "value", values = List("5.5", "5.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "19830", inputRightHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "29845", inputRightHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "39955", inputRightHash = "39950", diffs = List(ColumnsDiff(columnName = "value", values = List("5.5", "5.0"))))))
   }
 
   test("test analyses one change in different columns"){
@@ -102,15 +102,15 @@ class RowByRowAnalysesTest extends AnyFunSuite{
 
 
     assert(rowsDiffListA.length == 3)
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39955", diffs = List(ColumnsDiff(columnName = "id", values = List("3", "4"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "11133", inputRightHash = "19830", diffs = List(ColumnsDiff(columnName = "name", values = List("a", "b"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "49840", inputRightHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "39950", inputRightHash = "39955", diffs = List(ColumnsDiff(columnName = "id", values = List("3", "4"))))))
 
 
     assert(rowsDiffListB.length == 3)
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "39950", diffs = List(ColumnsDiff(columnName = "id", values = List("4", "3"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "19830", inputRightHash = "11133", diffs = List(ColumnsDiff(columnName = "name", values = List("b", "a"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "29845", inputRightHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "39955", inputRightHash = "39950", diffs = List(ColumnsDiff(columnName = "id", values = List("4", "3"))))))
   }
 
   test("test analyses one Dataframe is smaller than the other"){
@@ -130,18 +130,18 @@ class RowByRowAnalysesTest extends AnyFunSuite{
 
 
     assert(rowsDiffListA.length == 2)
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "11133", inputRightHash = "19830", diffs = List(ColumnsDiff(columnName = "value", values = List("3.0", "3.5"))))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "49840", inputRightHash = "29845", diffs = List(ColumnsDiff(columnName = "value", values = List("4.0", "4.5"))))))
 
 
     assert(rowsDiffListB.length == 3)
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "19830", inputBHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "29845", inputBHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "11133", diffs = List(
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "19830", inputRightHash = "11133", diffs = List(ColumnsDiff(columnName = "value", values = List("3.5", "3.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "29845", inputRightHash = "49840", diffs = List(ColumnsDiff(columnName = "value", values = List("4.5", "4.0"))))))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "39955", inputRightHash = "11133", diffs = List(
       ColumnsDiff(columnName = "id", values = List("3", "1")),
       ColumnsDiff(columnName = "name", values = List("c", "a")),
       ColumnsDiff(columnName = "value", values = List("5.5", "3.0"))))) ||
-      rowsDiffListB.contains(RowsDiff(inputAHash = "39955", inputBHash = "49840", diffs = List(
+      rowsDiffListB.contains(RowsDiff(inputLeftHash = "39955", inputRightHash = "49840", diffs = List(
         ColumnsDiff(columnName = "id", values = List("3", "4")),
         ColumnsDiff(columnName = "name", values = List("c", "b")),
         ColumnsDiff(columnName = "value", values = List("5.5", "4.0")))))
@@ -166,14 +166,14 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     val rowsDiffListB = analyse(dataB, dataA, "B")
 
     assert(rowsDiffListA.length == 3)
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "11133", inputBHash = "11133", diffs = List())))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "49840", inputBHash = "49840", diffs = List())))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "39950", inputBHash = "39950", diffs = List())))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "11133", inputRightHash = "11133", diffs = List())))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "49840", inputRightHash = "49840", diffs = List())))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "39950", inputRightHash = "39950", diffs = List())))
 
     assert(rowsDiffListB.length == 3)
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "11133", inputBHash = "11133", diffs = List())))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "49840", inputBHash = "49840", diffs = List())))
-    assert(rowsDiffListB.contains(RowsDiff(inputAHash = "39950", inputBHash = "39950", diffs = List())))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "11133", inputRightHash = "11133", diffs = List())))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "49840", inputRightHash = "49840", diffs = List())))
+    assert(rowsDiffListB.contains(RowsDiff(inputLeftHash = "39950", inputRightHash = "39950", diffs = List())))
   }
 
 

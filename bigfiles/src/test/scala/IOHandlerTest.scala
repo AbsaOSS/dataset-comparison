@@ -80,8 +80,8 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
     implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
     val data: List[RowsDiff] = List(
       RowsDiff(
-        inputAHash = "hash1",
-        inputBHash = "hash2",
+        inputLeftHash = "hash1",
+        inputRightHash = "hash2",
         diffs = List(
           ColumnsDiff(
             columnName = "id",
@@ -94,8 +94,8 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
         )
       ),
       RowsDiff(
-        inputAHash = "hash3",
-        inputBHash = "hash4",
+        inputLeftHash = "hash3",
+        inputRightHash = "hash4",
         diffs = List(
           ColumnsDiff(
             columnName = "id",
@@ -120,11 +120,11 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
     val jsonString = try source.mkString finally source.close()
     val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](jsonString)
     assert(rowsDiffListA.length == 2)
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "hash1", inputBHash = "hash2", diffs = List(
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "hash1", inputRightHash = "hash2", diffs = List(
       ColumnsDiff(columnName = "id", values = List("1", "2")),
       ColumnsDiff(columnName = "name", values = List("Alice", "Bob"))
     ))))
-    assert(rowsDiffListA.contains(RowsDiff(inputAHash = "hash3", inputBHash = "hash4", diffs = List(
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "hash3", inputRightHash = "hash4", diffs = List(
       ColumnsDiff(columnName = "id", values = List("3", "4")),
       ColumnsDiff(columnName = "name", values = List("Charlie", "David"))
     ))))
