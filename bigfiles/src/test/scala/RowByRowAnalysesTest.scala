@@ -1,6 +1,6 @@
 
 import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
-import africa.absa.cps.analysis.RowByRowAnalysis.analyse
+import africa.absa.cps.analysis.RowByRowAnalysis.generateDiffJson
 import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.SparkSession
 import org.scalatest.funsuite.AnyFunSuite
@@ -27,8 +27,8 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 3.0, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val rowsDiffListA = analyse(dataA, dataB, "A")
-    val rowsDiffListB = analyse(dataB, dataA, "B")
+    val rowsDiffListA = generateDiffJson(dataA, dataB, "A")
+    val rowsDiffListB = generateDiffJson(dataB, dataA, "B")
 
 
     assert(rowsDiffListA.length == 3)
@@ -67,8 +67,8 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 5.5, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val rowsDiffListA = analyse(dataA, dataB, "A")
-    val rowsDiffListB = analyse(dataB, dataA, "B")
+    val rowsDiffListA = generateDiffJson(dataA, dataB, "A")
+    val rowsDiffListB = generateDiffJson(dataB, dataA, "B")
 
 
     assert(rowsDiffListA.length == 3)
@@ -97,8 +97,8 @@ class RowByRowAnalysesTest extends AnyFunSuite{
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
 
-    val rowsDiffListA = analyse(dataA, dataB, "A")
-    val rowsDiffListB = analyse(dataB, dataA, "B")
+    val rowsDiffListA = generateDiffJson(dataA, dataB, "A")
+    val rowsDiffListB = generateDiffJson(dataB, dataA, "B")
 
 
     assert(rowsDiffListA.length == 3)
@@ -125,8 +125,8 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 5.5, 39955)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val rowsDiffListA = analyse(dataA, dataB, "A")
-    val rowsDiffListB = analyse(dataB, dataA, "B")
+    val rowsDiffListA = generateDiffJson(dataA, dataB, "A")
+    val rowsDiffListB = generateDiffJson(dataB, dataA, "B")
 
 
     assert(rowsDiffListA.length == 2)
@@ -162,8 +162,8 @@ class RowByRowAnalysesTest extends AnyFunSuite{
       (3, "c", 5.0, 39950)
     ).toDF("id", "name", "value", HASH_COLUMN_NAME)
 
-    val rowsDiffListA = analyse(dataA, dataB, "A")
-    val rowsDiffListB = analyse(dataB, dataA, "B")
+    val rowsDiffListA = generateDiffJson(dataA, dataB, "A")
+    val rowsDiffListB = generateDiffJson(dataB, dataA, "B")
 
     assert(rowsDiffListA.length == 3)
     assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "11133", inputRightHash = "11133", diffs = List())))
