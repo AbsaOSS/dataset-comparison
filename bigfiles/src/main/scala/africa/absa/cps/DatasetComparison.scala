@@ -52,8 +52,9 @@ object DatasetComparison {
     }
   }
 
-  private def handleRowDiffType(uniqA: DataFrame, uniqB: DataFrame, out: String, threshold: Int)
-                               (implicit sparkSession: SparkSession): Unit = {
+  private def handleRowDiffType(uniqA: DataFrame, uniqB: DataFrame, out: String, threshold: Int)(implicit
+      sparkSession: SparkSession
+  ): Unit = {
     if (uniqA.count() <= threshold && uniqB.count() <= threshold) {
       val diffA = RowByRowAnalysis.generateDiffJson(uniqA, uniqB, "A")
       val diffB = RowByRowAnalysis.generateDiffJson(uniqB, uniqA, "B")
