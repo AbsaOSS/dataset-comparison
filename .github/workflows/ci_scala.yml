@@ -71,7 +71,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-        with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
@@ -81,5 +80,5 @@ jobs:
           java-version: "adopt@1.8"
 
       - name: Run scalafmt And Print Diff
-        continue-on-error: true
+        continue-on-error: false
         run: sbt scalafmt scalafmtSbt && git diff --exit-code

@@ -1,11 +1,13 @@
 package africa.absa.cps.io
 
+import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.io.IOUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.ByteArrayInputStream
+import java.nio.file.{Files, Paths}
 
 object IOHandler {
 
@@ -58,6 +60,24 @@ object IOHandler {
       IOUtils.closeStream(inputStream)
       IOUtils.closeStream(outputStream)
     }
+  }
+
+  /** Write the row diff to a file as JSON
+    * @param filePath
+    *   path to write the diff
+    * @param diff
+    *   list of row differences
+    *
+    * ColumnsDiffRw are required for upickle, when write is used on List[RowsDiff] it will call write on ColumnsDiff
+    */
+  def rowDiffWriteAsJson(filePath: String, diff: Seq[RowsDiff])(implicit spark: SparkSession): Unit = {
+    logger.info(s"Saving row diff to $filePath")
+    import upickle.default._
+    implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW // Required for upickle
+    implicit val RowDiffRw: ReadWriter[RowsDiff]        = macroRW
+    val diffJson                                        = write(diff, indent = 4)
+    Files.write(Paths.get(filePath), diffJson.getBytes)
+    logger.info(s"Saved to $filePath")
   }
 
 }

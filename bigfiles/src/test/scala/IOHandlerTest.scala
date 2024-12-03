@@ -1,3 +1,4 @@
+import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
 import africa.absa.cps.io.IOHandler
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.json4s.native.JsonMethods.{compact, render}
@@ -5,9 +6,11 @@ import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.json4s.JsonDSL._
+import upickle.default._
 
 import java.io.File
 import java.nio.file.Paths
+import scala.io.Source
 import scala.reflect.io.Directory
 
 class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter{
@@ -70,6 +73,61 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
     val df = spark.read.json(jsonPath)
     val lines = df.toJSON.collect().mkString
     assert(parse(lines) === metricsJson)
+  }
+
+  test("test that rowDiffWriteAsJson writes a List[RowsDiff] to a JSON file") {
+    implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW
+    implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
+    val data: List[RowsDiff] = List(
+      RowsDiff(
+        inputLeftHash = "hash1",
+        inputRightHash = "hash2",
+        diffs = List(
+          ColumnsDiff(
+            columnName = "id",
+            values = List("1", "2")
+          ),
+          ColumnsDiff(
+            columnName = "name",
+            values = List("Alice", "Bob")
+          )
+        )
+      ),
+      RowsDiff(
+        inputLeftHash = "hash3",
+        inputRightHash = "hash4",
+        diffs = List(
+          ColumnsDiff(
+            columnName = "id",
+            values = List("3", "4")
+          ),
+          ColumnsDiff(
+            columnName = "name",
+            values = List("Charlie", "David")
+          )
+        )
+      )
+    )
+
+    val dir = new File(folder)
+    if (!dir.exists()) {
+      dir.mkdirs()
+    }
+
+    IOHandler.rowDiffWriteAsJson(Paths.get(jsonPath).toString, data)
+
+    val source = Source.fromFile(jsonPath)
+    val jsonString = try source.mkString finally source.close()
+    val rowsDiffListA: List[RowsDiff] = read[List[RowsDiff]](jsonString)
+    assert(rowsDiffListA.length == 2)
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "hash1", inputRightHash = "hash2", diffs = List(
+      ColumnsDiff(columnName = "id", values = List("1", "2")),
+      ColumnsDiff(columnName = "name", values = List("Alice", "Bob"))
+    ))))
+    assert(rowsDiffListA.contains(RowsDiff(inputLeftHash = "hash3", inputRightHash = "hash4", diffs = List(
+      ColumnsDiff(columnName = "id", values = List("3", "4")),
+      ColumnsDiff(columnName = "name", values = List("Charlie", "David"))
+    ))))
   }
 }
 

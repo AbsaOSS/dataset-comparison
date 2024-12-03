@@ -37,6 +37,10 @@ object ArgsParser {
           .valueName("<file>")
           .action((x, c) => c.copy(inputB = x))
           .text("inputB paths to compare"),
+        opt[String]('d', "diff") // diff type
+          .optional()
+          .action((x, c) => c.copy(diff = DiffComputeType.withName(x)))
+          .text("Compute differences. You can chose from: (Row)"),
         opt[Seq[String]]('e', "exclude") // columns to exclude
           .valueName("<column1>,<column2>...")
           .action((x, c) => c.copy(exclude = x))
