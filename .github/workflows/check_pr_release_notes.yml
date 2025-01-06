@@ -39,6 +39,13 @@ jobs:
           github-repository: ${{ github.repository }}
           pr-number: ${{ github.event.number }}
 
+      - name: Check for ERROR in logs
+        run: |
+          if grep -q "ERROR" "${{ github.workspace }}/_actions/AbsaOSS/release-notes-presence-check@v0.2.0/logs.txt"; then
+            echo "Error found in logs"
+            exit 1
+          fi
+
       - name: Print outcome
         run: |
           echo "Outcome: ${{ steps.check-release-notes.outcome }}"
