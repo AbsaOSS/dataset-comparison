@@ -16,6 +16,7 @@
 
 name: Release - create draft release
 on:
+  push: {}
   workflow_dispatch:
     inputs:
       tag-name:
