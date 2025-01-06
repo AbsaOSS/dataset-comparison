@@ -39,6 +39,10 @@ jobs:
           github-repository: ${{ github.repository }}
           pr-number: ${{ github.event.number }}
 
+      - name: Print outcome
+        run:
+          echo "Outcome: ${{ steps.check-release-notes.outcome }}"
+
       - name: Fail if release notes check failed
         if: steps.check-release-notes.outcome != 'success'
         run: exit 1
