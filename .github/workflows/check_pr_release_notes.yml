@@ -37,4 +37,7 @@ jobs:
         with:
           github-repository: ${{ github.repository }}
           pr-number: ${{ github.event.number }}
-        continue-on-error: false
+
+      - name: Fail if release notes check failed
+        if: steps.check-release-notes.outcome != 'success'
+        run: exit 1
