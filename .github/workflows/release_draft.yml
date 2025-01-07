@@ -69,6 +69,7 @@ jobs:
             - { title: No entry 🚫, label: duplicate }
             - { title: No entry 🚫, label: invalid }
             - { title: No entry 🚫, label: wontfix }
+            - { title: No entry 🚫, label: no RN},
             - { title: New Features 🎉, label: enhancement }
             - { title: New Features 🎉, label: feature }
             - { title: Bugfixes 🛠, label: bug }
