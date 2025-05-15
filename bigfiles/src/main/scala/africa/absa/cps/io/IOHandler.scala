@@ -1,6 +1,8 @@
 package africa.absa.cps.io
 
 import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
+import africa.absa.cps.parser.OutputFormatType
+import africa.absa.cps.parser.OutputFormatType._
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.io.IOUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -34,9 +36,14 @@ object IOHandler {
     * @param data
     *   DataFrame to write
     */
-  def dfWrite(filePath: String, data: DataFrame): Unit = {
+  def dfWrite(filePath: String, data: DataFrame, format: OutputFormatType): Unit = {
     logger.info(s"Saving data to $filePath")
-    data.write.format("parquet").save(filePath)
+    var writer = data.write.format(format.toString)
+    if (format == OutputFormatType.CSV) {
+      writer = data.coalesce(1).write.format(format.toString)
+      writer.option("header", "true")
+    }
+    writer.save(filePath)
   }
 
   /** Write json data to a file

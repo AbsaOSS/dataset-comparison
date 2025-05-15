@@ -27,6 +27,10 @@ object ArgsParser {
           .valueName("<file>")
           .action((x, c) => c.copy(out = x))
           .text("output path to directory"),
+        opt[String]('f', "format") // output format
+          .optional()
+          .action((x, c) => c.copy(outFormat = OutputFormatType.withName(x)))
+          .text("output format. You can chose from: (parquet, csv)"),
         opt[String]("inputA") // path to first input
           .required()
           .valueName("<file>")

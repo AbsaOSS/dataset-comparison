@@ -1,5 +1,6 @@
 import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
 import africa.absa.cps.io.IOHandler
+import africa.absa.cps.parser.OutputFormatType
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.json4s.native.JsonMethods.{compact, render}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
@@ -20,6 +21,7 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
   import spark.implicits._
   val folder = "testoutput"
   val filePath: String = folder + "/sample.parquet"
+  val filePathCsv: String = folder + "/sample.csv"
   val jsonPath: String = folder +"/sample.json"
 
 
@@ -43,7 +45,7 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
   test("test that dfWrite write a DataFrame to a Parquet file") {
     val df: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
 
-    IOHandler.dfWrite(filePath, df)
+    IOHandler.dfWrite(filePath, df, OutputFormatType.Parquet)
 
     val writtenDf: DataFrame = spark.read.parquet(filePath)
     assert(writtenDf != null)
@@ -52,7 +54,19 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
 
   }
 
-  test("test that jsonWrite write a DataFrame to a Parquet file") {
+  test("test that dfWrite write a DataFrame to a CSV file") {
+    val df: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
+
+    IOHandler.dfWrite(filePathCsv, df, OutputFormatType.CSV)
+
+    val writtenDf: DataFrame = spark.read.option("header", "true").csv(filePathCsv)
+    assert(writtenDf != null)
+    assert(writtenDf.count() === 2)
+    assert(writtenDf.columns === Array("id", "value"))
+
+  }
+
+  test("test that jsonWrite write a DataFrame to a Json file") {
     val metricsJson =
       ("A" ->
         ("row count" -> 100) ~
