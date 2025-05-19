@@ -5,14 +5,15 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 import java.io.File
+import java.nio.file.Paths
 import scala.reflect.io.Directory
 
 
 
 class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter{
   implicit val spark: SparkSession = SparkTestSession.spark
-  val folder = "src/test/resources/"
-  val testOutput: String = folder + "testoutput"
+  val folder: String = Paths.get("src/test/resources/").toAbsolutePath.toString
+  val testOutput: String = folder + "/testoutput"
 
 
   import spark.implicits._
@@ -30,7 +31,7 @@ class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfte
 
 
   test("test that DatasetComparison generates the correct output files") {
-    val args = Array[String]("-o", testOutput, "--inputA", folder + "namesA.parquet", "--inputB", folder + "namesB.parquet")
+    val args = Array[String]("-o", testOutput, "--inputA", folder + "/namesA.parquet", "--inputB", folder + "/namesB.parquet")
     DatasetComparison.main(args)
 
 
@@ -63,7 +64,7 @@ class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfte
   }
 
   test("test that DatasetComparison generates the correct output files with --diff") {
-    val args = Array[String]("-o", testOutput, "--inputA", folder + "namesA.parquet", "--inputB", folder + "namesB.parquet", "--diff", "Row")
+    val args = Array[String]("-o", testOutput, "--inputA", folder + "/namesA.parquet", "--inputB", folder + "/namesB.parquet", "--diff", "Row")
     DatasetComparison.main(args)
 
 
@@ -102,7 +103,7 @@ class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfte
   }
 
   test("test that DatasetComparison generates the correct output files with --format CSV") {
-    val args = Array[String]("-o", testOutput, "--inputA", folder + "namesA.parquet", "--inputB", folder + "namesB.parquet", "--format", "csv")
+    val args = Array[String]("-o", testOutput, "--inputA", folder + "/namesA.parquet", "--inputB", folder + "/namesB.parquet", "--format", "csv")
     DatasetComparison.main(args)
 
 
@@ -128,7 +129,6 @@ class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfte
 
     // check that metricsDf is not empty
     assert(metricsDf.count() > 0)
-    // check that AChangesToBDf is not empty
   }
 
 }
