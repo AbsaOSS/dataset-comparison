@@ -40,7 +40,7 @@ object IOHandler {
     logger.info(s"Saving data to $filePath")
     var writer = data.write.format(format.toString)
     if (format == OutputFormatType.CSV) {
-      writer = data.coalesce(1).write.format(format.toString)
+      writer = data.write.format(format.toString)
       writer.option("header", "true")
     }
     writer.save(filePath)
