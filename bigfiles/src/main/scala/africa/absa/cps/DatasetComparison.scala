@@ -39,8 +39,8 @@ object DatasetComparison {
 
     // write to files
     val out = arguments.out
-    IOHandler.dfWrite(Paths.get(out, "inputA_differences").toString, uniqA)
-    IOHandler.dfWrite(Paths.get(out, "inputB_differences").toString, uniqB)
+    IOHandler.dfWrite(Paths.get(out, "inputA_differences").toString, uniqA, arguments.outFormat)
+    IOHandler.dfWrite(Paths.get(out, "inputB_differences").toString, uniqB, arguments.outFormat)
     IOHandler.jsonWrite(Paths.get(out, "metrics.json").toString, metrics)
 
     val uniqAEmpty = uniqA.isEmpty

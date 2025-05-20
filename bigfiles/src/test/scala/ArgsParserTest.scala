@@ -1,4 +1,4 @@
-import africa.absa.cps.parser.{ArgsParser, Arguments, DiffComputeType}
+import africa.absa.cps.parser.{ArgsParser, Arguments, DiffComputeType, OutputFormatType}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
@@ -82,6 +82,36 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
     val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "-d", "NotValid")
     assertThrows[IllegalArgumentException](ArgsParser.getArgs(args))
   }
+
+  test("test format option will be set to Parquet if passed") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "-f", "parquet")
+    val res = ArgsParser.getArgs(args)
+    assert(res.outFormat == OutputFormatType.Parquet)
+    assert(res.outFormat.toString == "parquet")
+
+    val args2 = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--format", "parquet")
+    val res2 = ArgsParser.getArgs(args2)
+    assert(res2.outFormat == OutputFormatType.Parquet)
+  }
+
+  test("test format option will be set to CSV if passed") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "-f", "csv")
+    val res = ArgsParser.getArgs(args)
+    assert(res.outFormat == OutputFormatType.CSV)
+    assert(res.outFormat.toString == "csv")
+
+    val args2 = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--format", "csv")
+    val res2 = ArgsParser.getArgs(args2)
+    assert(res2.outFormat == OutputFormatType.CSV)
+  }
+
+  test("test format option will be set to Parquet if NOT passed") {
+    val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2")
+    val res = ArgsParser.getArgs(args)
+    assert(res.outFormat == OutputFormatType.Parquet)
+  }
+
+
 
 
   test("test that exclude option is correctly parsed") {

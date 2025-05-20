@@ -16,6 +16,15 @@ Then run:
 ```bash
 spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>
 ```
+### Parameters:
+| Parameter | Description | Required |
+|-----------|-------------|----------|
+|`-o` or `--out` |output path| **required**|
+|`--inputA` |input file A| **required**|
+|`--inputB` |input file B| **required**|
+|`-f` or `--format` [parquet, csv]|input file format| **optional**|
+|`-d` or `--diff` [Row] |difference compute type| **optional**|
+|`-e` or `--exclude`|columns to exclude|**optional**|
 
 ### Run with specific config 
 
