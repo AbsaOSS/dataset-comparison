@@ -41,8 +41,6 @@ We have decided to use row by row comparison for detailed analyses. We can use m
 ![alt text](images/analyses.png)
 
 
-> All charts could be seen on [this Miro board](https://miro.com/app/board/uXjVLaOagec=/?share_link_id=579669188211)
-
 ## Project structure
 
 Project is divided into two modules:
