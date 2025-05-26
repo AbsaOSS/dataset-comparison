@@ -1,9 +1,21 @@
-package africa.absa.cps
+/** Copyright 2020 ABSA Group Limited
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+  * specific language governing permissions and limitations under the License.
+  */
 
-import africa.absa.cps.DatasetComparison.logger
-import africa.absa.cps.analysis.RowByRowAnalysis
-import africa.absa.cps.parser.{ArgsParser, DiffComputeType}
-import africa.absa.cps.io.IOHandler
+package za.co.absa
+
+import za.co.absa.DatasetComparison.logger
+import za.co.absa.analysis.RowByRowAnalysis
+import za.co.absa.parser.{ArgsParser, DiffComputeType}
+import za.co.absa.io.IOHandler
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}

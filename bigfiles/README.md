@@ -29,7 +29,7 @@ spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-pa
 ### Run with specific config 
 
 ```bash
-spark-submit --class africa.absa.cps.DatasetComparison --conf "spark.driver.extraJavaOptions=-Dconfig.file=/path/to/application.conf" target/scala-2.12/dataset-comparison-assembly-0.1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path> -d Row
+spark-submit --class za.co.absa.DatasetComparison --conf "spark.driver.extraJavaOptions=-Dconfig.file=/path/to/application.conf" target/scala-2.12/dataset-comparison-assembly-0.1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path> -d Row
 ```
 `-d Row` is optional parameter for detailed analyses that specifies which analyses to use. Now it can be only `Row`.
 It will compute detailed analyses if number of different columns is less than 200, you can change this threshold in `src/main/resources/application.conf`.
@@ -94,16 +94,16 @@ tutorial [here](https://dev.to/awwsmm/installing-and-running-hadoop-and-spark-on
    ```xml
     <property>
       <name>dfs.name.dir</name>
-      <value>/Users/AB032MJ/hadoop_temp/name_node</value> 
+      <value>/.../hadoop_temp/name_node</value> 
     </property>
     <property> 
       <name>dfs.data.dir</name>
-      <value>/Users/AB032MJ/hadoop_temp/data_node</value> 
+      <value>/.../hadoop_temp/data_node</value> 
     </property>
     
     <property> 
       <name>hadoop.tmp.dir</name>
-      <value>/Users/AB032MJ/hadoop_temp/internal_temp</value>  
+      <value>/.../hadoop_temp/internal_temp</value>  
     </property>
     
     <property>
@@ -143,7 +143,7 @@ tutorial [here](https://dev.to/awwsmm/installing-and-running-hadoop-and-spark-on
        </property>
     ```
    Add this into **hadoop-env.sh**
-   ```export JAVA_HOME="/Users/AB032MJ/.sdkman/candidates/java/8.0.422-amzn"```
+   ```export JAVA_HOME="/.../.sdkman/candidates/java/8.0.422-amzn"```
 
 4. create directories by configuration for example: 
     ```

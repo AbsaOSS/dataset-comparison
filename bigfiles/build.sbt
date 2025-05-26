@@ -13,13 +13,13 @@ lazy val supportedScalaVersions = List(scala211, scala212)
 
 ThisBuild / version      := "0.1.0"
 ThisBuild / scalaVersion := scala212
-ThisBuild / organization := "africa.absa.cps"
+ThisBuild / organization := "za.co.absa"
 
 lazy val root = (project in file("."))
   .settings(
     name                 := "dataset-comparison",
     crossScalaVersions   := supportedScalaVersions,
-    assembly / mainClass := Some("africa.absa.cps.DatasetComparison"),
+    assembly / mainClass := Some("za.co.absa.DatasetComparison"),
     libraryDependencies ++= bigfilesDependencies ++ Seq(
       "org.apache.spark" %% "spark-core"     % sparkVersionForScala(scalaVersion.value) % Provided,
       "org.apache.spark" %% "spark-sql"      % sparkVersionForScala(scalaVersion.value) % Provided,
@@ -48,7 +48,7 @@ Test / jacocoReportSettings := JacocoReportSettings(
   formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
 )
 
-Test / jacocoExcludes := Seq("africa.absa.cps.DatasetComparison*")
+Test / jacocoExcludes := Seq("za.co.absa.DatasetComparison*")
 
 ThisBuild / assemblyMergeStrategy := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
