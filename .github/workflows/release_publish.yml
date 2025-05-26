@@ -56,7 +56,7 @@ jobs:
           jar_file=$(ls target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar)
           base_name=$(basename $jar_file)
           cp target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar staging/scala-${{ matrix.scalaShort }}$base_name
-          echo "artifact_name=scala-${{ matrix.scalaShort }}$base_name" >> $GITHUB_ENV
+          echo "artifact_name=scala-${{ matrix.scalaShort }}-$base_name" >> $GITHUB_ENV
 
       - name: Info on publish
         run: |
