@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.parser
+package za.co.absa.parser
 
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.Path

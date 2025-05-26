@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import africa.absa.cps.parser.{ArgsParser, Arguments, DiffComputeType, OutputFormatType}
+import za.co.absa.parser.{ArgsParser, Arguments, DiffComputeType, OutputFormatType}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession

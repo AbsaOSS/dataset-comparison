@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.analysis
+package za.co.absa.analysis
 
 import org.apache.spark.sql.Row
 

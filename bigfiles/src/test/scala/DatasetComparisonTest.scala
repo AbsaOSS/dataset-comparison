@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import africa.absa.cps.DatasetComparison
+import za.co.absa.DatasetComparison
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatest.funsuite.AnyFunSuite

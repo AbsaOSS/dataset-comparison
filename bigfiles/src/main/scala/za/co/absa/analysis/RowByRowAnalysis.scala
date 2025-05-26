@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.analysis
+package za.co.absa.analysis
 
-import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
+import za.co.absa.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, Row}
 import org.slf4j.{Logger, LoggerFactory}

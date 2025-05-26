@@ -14,11 +14,11 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.io
+package za.co.absa.io
 
-import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
-import africa.absa.cps.parser.OutputFormatType
-import africa.absa.cps.parser.OutputFormatType._
+import za.co.absa.analysis.{ColumnsDiff, RowsDiff}
+import za.co.absa.parser.OutputFormatType
+import za.co.absa.parser.OutputFormatType._
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.io.IOUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}

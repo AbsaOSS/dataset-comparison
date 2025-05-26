@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
-import africa.absa.cps.io.IOHandler
-import africa.absa.cps.parser.OutputFormatType
+import za.co.absa.analysis.{ColumnsDiff, RowsDiff}
+import za.co.absa.io.IOHandler
+import za.co.absa.parser.OutputFormatType
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.json4s.native.JsonMethods.{compact, render}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}

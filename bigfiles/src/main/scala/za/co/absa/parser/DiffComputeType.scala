@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.parser
+package za.co.absa.parser
 
 object DiffComputeType extends Enumeration {
   val None, Row = Value

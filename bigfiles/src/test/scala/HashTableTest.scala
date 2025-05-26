@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-import africa.absa.cps.Comparator
-import africa.absa.cps.hash.HashUtils
-import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
+import za.co.absa.Comparator
+import za.co.absa.hash.HashUtils
+import za.co.absa.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 

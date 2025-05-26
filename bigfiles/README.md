@@ -29,7 +29,7 @@ spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-pa
 ### Run with specific config 
 
 ```bash
-spark-submit --class africa.absa.cps.DatasetComparison --conf "spark.driver.extraJavaOptions=-Dconfig.file=/path/to/application.conf" target/scala-2.12/dataset-comparison-assembly-0.1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path> -d Row
+spark-submit --class za.co.absa.DatasetComparison --conf "spark.driver.extraJavaOptions=-Dconfig.file=/path/to/application.conf" target/scala-2.12/dataset-comparison-assembly-0.1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path> -d Row
 ```
 `-d Row` is optional parameter for detailed analyses that specifies which analyses to use. Now it can be only `Row`.
 It will compute detailed analyses if number of different columns is less than 200, you can change this threshold in `src/main/resources/application.conf`.

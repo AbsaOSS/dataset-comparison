@@ -14,6 +14,6 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.analysis
+package za.co.absa.analysis
 
 case class ColumnsDiff(columnName: String = "N/A", values: Seq[String] = Seq.empty)

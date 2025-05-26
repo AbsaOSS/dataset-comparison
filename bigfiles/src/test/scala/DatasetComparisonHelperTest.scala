@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import africa.absa.cps.DatasetComparisonHelper
+import za.co.absa.DatasetComparisonHelper
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 

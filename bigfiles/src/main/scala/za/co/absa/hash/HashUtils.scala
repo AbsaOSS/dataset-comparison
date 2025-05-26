@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.hash
+package za.co.absa.hash
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row

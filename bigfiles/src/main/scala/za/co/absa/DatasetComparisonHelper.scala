@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps
+package za.co.absa
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
 

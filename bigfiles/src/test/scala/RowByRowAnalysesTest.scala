@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-import africa.absa.cps.analysis.{ColumnsDiff, RowsDiff}
-import africa.absa.cps.analysis.RowByRowAnalysis.generateDiffJson
-import africa.absa.cps.hash.HashUtils.HASH_COLUMN_NAME
+import za.co.absa.analysis.{ColumnsDiff, RowsDiff}
+import za.co.absa.analysis.RowByRowAnalysis.generateDiffJson
+import za.co.absa.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.SparkSession
 import org.scalatest.funsuite.AnyFunSuite
 import upickle.default._

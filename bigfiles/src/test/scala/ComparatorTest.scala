@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-import africa.absa.cps.Comparator
+import za.co.absa.Comparator
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 

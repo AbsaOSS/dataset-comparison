@@ -14,6 +14,12 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.analysis
+package za.co.absa.parser
 
-case class RowsDiff(inputLeftHash: String = "N/A", inputRightHash: String = "N/A", diffs: Seq[ColumnsDiff] = Seq.empty)
+object OutputFormatType extends Enumeration {
+  type OutputFormatType = Value
+  val Parquet: OutputFormatType = Value("parquet")
+  val CSV: OutputFormatType     = Value("csv")
+
+  override def toString: String = super.toString
+}

@@ -14,13 +14,6 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.parser
+package za.co.absa.analysis
 
-case class Arguments(
-    out: String = "",
-    inputA: String = "",
-    inputB: String = "",
-    outFormat: OutputFormatType.Value = OutputFormatType.Parquet,
-    diff: DiffComputeType.Value = DiffComputeType.None,
-    exclude: Seq[String] = Seq()
-)
+case class RowsDiff(inputLeftHash: String = "N/A", inputRightHash: String = "N/A", diffs: Seq[ColumnsDiff] = Seq.empty)

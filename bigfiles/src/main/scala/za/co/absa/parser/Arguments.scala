@@ -14,12 +14,13 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps.parser
+package za.co.absa.parser
 
-object OutputFormatType extends Enumeration {
-  type OutputFormatType = Value
-  val Parquet: OutputFormatType = Value("parquet")
-  val CSV: OutputFormatType     = Value("csv")
-
-  override def toString: String = super.toString
-}
+case class Arguments(
+    out: String = "",
+    inputA: String = "",
+    inputB: String = "",
+    outFormat: OutputFormatType.Value = OutputFormatType.Parquet,
+    diff: DiffComputeType.Value = DiffComputeType.None,
+    exclude: Seq[String] = Seq()
+)

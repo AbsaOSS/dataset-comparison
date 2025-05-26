@@ -14,12 +14,12 @@
  * limitations under the License.
  **/
 
-package africa.absa.cps
+package za.co.absa
 
-import africa.absa.cps.DatasetComparison.logger
-import africa.absa.cps.analysis.RowByRowAnalysis
-import africa.absa.cps.parser.{ArgsParser, DiffComputeType}
-import africa.absa.cps.io.IOHandler
+import za.co.absa.DatasetComparison.logger
+import za.co.absa.analysis.RowByRowAnalysis
+import za.co.absa.parser.{ArgsParser, DiffComputeType}
+import za.co.absa.io.IOHandler
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
