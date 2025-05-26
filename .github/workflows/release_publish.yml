@@ -57,6 +57,7 @@ jobs:
           base_name=$(basename $jar_file)
           cp target/scala-${{ matrix.scalaShort }}/dataset-comparison-*.jar staging/scala-${{ matrix.scalaShort }}$base_name
           echo "artifact_name=scala-${{ matrix.scalaShort }}-$base_name" >> $GITHUB_ENV
+          ls -lh staging
 
       - name: Info on publish
         run: |
@@ -65,6 +66,6 @@ jobs:
           echo "In repo: ${{ github.repository }}"
 
       - name: Upload JAR file to GitHub Release
-        run: gh release upload ${{ github.event.release.tag_name }} bigfiles/staging --repo ${{ github.repository }}
+        run: gh release upload ${{ github.event.release.tag_name }} bigfiles/staging/* --repo ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
