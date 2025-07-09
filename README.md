@@ -62,13 +62,16 @@ Project is divided into two modules:
 
 ### bigfiles
 
+- [How to Run](bigfiles/README.md#how-to-run)
 - bigfile is file that does not fit to RAM
 - module for comparing big files
 - written in Scala
 - more about bigfiles module could be found in [bigfiles README](bigfiles/README.md)
 
+
 ### smallfiles
 
+- [How to Run](smallfiles/README.md#how-to-run)
 - smallfile is file that fits to RAM
 - module for comparing small files
 - written in Python

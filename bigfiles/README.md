@@ -1,6 +1,6 @@
 # Scala CPS-Dataset-Comparison 
 
-This is scala implementation of the project. It is used for comparing big files.
+This is scala implementation of the project. It is used for comparing big files (files that can not fit to RAM).
 
 - [How to run](#how-to-run)
   - [Requirements](#requirements)
@@ -15,6 +15,7 @@ Then run:
 
 ```bash
 spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>
+
 ```
 ### Parameters:
 | Parameter | Description | Required |
@@ -25,6 +26,18 @@ spark-submit target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-pa
 |`-f` or `--format` [parquet, csv]|input file format| **optional**|
 |`-d` or `--diff` [Row] |difference compute type| **optional**|
 |`-e` or `--exclude`|columns to exclude|**optional**|
+
+Example:
+```bash
+spark-submit --class africa.absa.cps.DatasetComparison \
+  --conf "spark.driver.extraJavaOptions=-Dconfig.file=/../bigfiles/src/main/resources/application.conf" \
+  target/scala-2.11/dataset-comparison-assembly-0.1.0.jar \
+  -o "/test_files/output_names$(date '+%Y-%m-%d_%H%M%S')" \
+  --inputA /test_files/namesA.parquet \
+  --inputB /test_files/namesB.parquet \
+  -d Row
+
+```
 
 ### Run with specific config 
 

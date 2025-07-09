@@ -1,6 +1,8 @@
 # Python CPS-Dataset-Comparison
 
-This is python implementation of the project. It is used for comparing small files.
+> This module is not yet implemented.
+
+This is python implementation of the project. It is used for comparing small files (files fitting into RAM).
 
 - [Create and run environment](#create-and-run-environment)
 - [Run main](#run-main)
