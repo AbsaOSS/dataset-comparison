@@ -83,7 +83,8 @@ object ArgsParser {
     */
   def validate(args: Arguments)(implicit spark: SparkSession): Boolean = {
     val config = spark.sparkContext.hadoopConfiguration
-    val fs     = FileSystem.get(config)
+    val fsFilePath = new Path(args.inputA)
+    val fs = fsFilePath.getFileSystem(config)
     if (!fs.exists(new Path(args.inputA))) throw new IllegalArgumentException(s"Input ${args.inputA} does not exist")
     if (!fs.exists(new Path(args.inputB))) throw new IllegalArgumentException(s"Input ${args.inputB} does not exist")
     if (fs.exists(new Path(args.out))) throw new IllegalArgumentException(s"Output ${args.out} already exist")
