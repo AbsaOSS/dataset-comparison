@@ -15,5 +15,4 @@ addSbtPlugin("com.github.sbt" % "sbt-git"      % "2.0.0")
 addSbtPlugin("org.scalameta"  % "sbt-scalafmt" % "2.4.6")
 addSbtPlugin("io.github.moranaapps" % "jacoco-method-filter-sbt" % "2.0.1")
 
-// Plugins to build the server module as a jar file
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.2.0")

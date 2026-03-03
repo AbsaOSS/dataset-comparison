@@ -36,19 +36,10 @@ lazy val root = (project in file("."))
     name                 := "dataset-comparison",
     crossScalaVersions   := supportedScalaVersions,
     assembly / mainClass := Some("za.co.absa.DatasetComparison"),
-    libraryDependencies ++= bigfilesDependencies ++ Seq(
-      "org.apache.spark" %% "spark-core"     % sparkVersionForScala(scalaVersion.value) % Provided,
-      "org.apache.spark" %% "spark-sql"      % sparkVersionForScala(scalaVersion.value) % Provided,
-      "org.json4s"       %% "json4s-native"  % jsonVersionForScala(scalaVersion.value),
-      "org.json4s"       %% "json4s-jackson" % jsonVersionForScala(scalaVersion.value),
-      "org.apache.hadoop" % "hadoop-common"  % hadoopVersionForScala(scalaVersion.value),
-      "org.apache.hadoop" % "hadoop-client"  % hadoopVersionForScala(scalaVersion.value),
-      "org.apache.hadoop" % "hadoop-hdfs"    % hadoopVersionForScala(scalaVersion.value),
-      "com.lihaoyi"      %% "upickle"        % unpickleVersionForScala(scalaVersion.value)
-    ),
+    libraryDependencies ++= appDependencies(scalaVersion.value),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
     Test / fork          := true,
-    Test / baseDirectory := (ThisBuild / baseDirectory).value,
+    Test / baseDirectory := (ThisBuild / baseDirectory).value / "app",
     packageOptions := Seq(
       ManifestAttributes(
         ("Built-By", System.getProperty("user.name")),
@@ -58,7 +49,13 @@ lazy val root = (project in file("."))
     )
   )
 
-ThisBuild / assemblyMergeStrategy := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-  case x                             => MergeStrategy.first
-}
+// ── root aggregate ────────────────────────────────────────────────────────────
+lazy val root = (project in file("."))
+  .aggregate(api, app)
+  .settings(
+    name := "dataset-comparison-root",
+    // Prevent root from being published or assembled
+    publish / skip := true
+  )
+
+

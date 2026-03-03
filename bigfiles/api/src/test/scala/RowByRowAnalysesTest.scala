@@ -27,7 +27,6 @@ class RowByRowAnalysesTest extends AnyFunSuite{
   import spark.implicits._
   implicit val ColumnsDiffRw: ReadWriter[ColumnsDiff] = macroRW
   implicit val RowDiffRw: ReadWriter[RowsDiff] = macroRW
-//  spark.sparkContext.setLogLevel("DEBUG")
 
   test("test analyses multiple changes") {
     val dataA = Seq(
