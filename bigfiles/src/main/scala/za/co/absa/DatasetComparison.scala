@@ -12,11 +12,10 @@
 
 package za.co.absa
 
-import za.co.absa.DatasetComparison.logger
-import za.co.absa.analysis.RowByRowAnalysis
+import za.co.absa.analysis.{AnalysisResult, ComparisonMetricsCalculator, RowByRowAnalysis}
 import za.co.absa.parser.{ArgsParser, DiffComputeType}
 import za.co.absa.io.IOHandler
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.SparkSession
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -40,51 +39,54 @@ object DatasetComparison {
     ArgsParser.validate(arguments)
 
     // read data
-    val rawDataA         = IOHandler.sparkRead(arguments.inputA)
-    val rawDataB         = IOHandler.sparkRead(arguments.inputB)
-    val dataA: DataFrame = DatasetComparisonHelper.exclude(rawDataA, arguments.exclude, "A")
-    val dataB: DataFrame = DatasetComparisonHelper.exclude(rawDataB, arguments.exclude, "B")
+    val rawDataA = IOHandler.sparkRead(arguments.inputA)
+    val rawDataB = IOHandler.sparkRead(arguments.inputB)
 
-    val (uniqA, uniqB) = Comparator.compare(dataA, dataB)
+    val (diffA, diffB) = Comparator.compare(rawDataA, rawDataB, arguments.exclude)
 
-    val metrics: String = Comparator.createMetrics(dataA, dataB, uniqA, uniqB, arguments.exclude)
-
-    // write to files
+    // write diff files
     val out = arguments.out
-    IOHandler.dfWrite(Paths.get(out, "inputA_differences").toString, uniqA, arguments.outFormat)
-    IOHandler.dfWrite(Paths.get(out, "inputB_differences").toString, uniqB, arguments.outFormat)
-    IOHandler.jsonWrite(Paths.get(out, "metrics.json").toString, metrics)
+    IOHandler.dfWrite(Paths.get(out, "inputA_differences").toString, diffA, arguments.outFormat)
+    IOHandler.dfWrite(Paths.get(out, "inputB_differences").toString, diffB, arguments.outFormat)
 
-    val uniqAEmpty = uniqA.isEmpty
-    val uniqBEmpty = uniqB.isEmpty
+    val metrics = ComparisonMetricsCalculator.calculate(rawDataA, rawDataB, diffA, diffB, arguments.exclude)
+      .getOrElse(throw new RuntimeException("Failed to calculate metrics"))
+    val metricsJson = MetricsSerializer.serialize(metrics)
+    IOHandler.jsonWrite(Paths.get(out, "metrics.json").toString, metricsJson)
+
     arguments.diff match {
-      case _ if uniqBEmpty || uniqAEmpty => logEitherUniqEmpty(uniqAEmpty, uniqBEmpty)
-      case DiffComputeType.Row           => handleRowDiffType(uniqA, uniqB, out, threshold)
-      case _                             => logger.info("None DiffComputeType selected")
+      case DiffComputeType.Row =>
+        logger.info("Starting row-by-row analysis")
+        RowByRowAnalysis.analyze(diffA, diffB, threshold) match {
+          case AnalysisResult.Success(diffAToB, diffBToA) =>
+            logger.info("Computing row-by-row differences")
+            IOHandler.rowDiffWriteAsJson(Paths.get(out, "A_to_B_changes.json").toString, diffAToB)
+            IOHandler.rowDiffWriteAsJson(Paths.get(out, "B_to_A_changes.json").toString, diffBToA)
+            logger.info("Row-by-row analysis completed successfully")
+
+          case AnalysisResult.DatasetsIdentical =>
+            logger.info("Datasets are identical, no row-by-row analysis needed")
+
+          case AnalysisResult.OneSidedDifference(countA, countB) =>
+            logger.info(
+              s"""Detailed analysis will not be computed - one-sided difference:
+                 |A: ${if (countA == 0) "All rows matched" else s"$countA differences (see inputA_differences)"}
+                 |B: ${if (countB == 0) "All rows matched" else s"$countB differences (see inputB_differences)"}
+                 |Row-by-row matching requires differences in both datasets
+                 |""".stripMargin
+            )
+
+          case AnalysisResult.ThresholdExceeded(countA, countB, thresh) =>
+            logger.warn(
+              s"""Row-by-row analysis skipped - threshold exceeded:
+                 |A differences: $countA
+                 |B differences: $countB
+                 |Threshold: $thresh
+                 |Details available in inputA_differences and inputB_differences files
+                 |""".stripMargin
+            )
+        }
+      case _ => logger.info("None DiffComputeType selected")
     }
-  }
-
-  private def handleRowDiffType(uniqA: DataFrame, uniqB: DataFrame, out: String, threshold: Int)(implicit
-      sparkSession: SparkSession
-  ): Unit = {
-    if (uniqA.count() <= threshold && uniqB.count() <= threshold) {
-      val diffA = RowByRowAnalysis.generateDiffJson(uniqA, uniqB, "A")
-      val diffB = RowByRowAnalysis.generateDiffJson(uniqB, uniqA, "B")
-
-      // write diff
-      IOHandler.rowDiffWriteAsJson(Paths.get(out, "A_to_B_changes.json").toString, diffA)
-      IOHandler.rowDiffWriteAsJson(Paths.get(out, "B_to_A_changes.json").toString, diffB)
-    } else {
-      logger.warn("The number of differences is too large to compute row by row differences.")
-    }
-  }
-
-  private def logEitherUniqEmpty(uniqAEmpty: Boolean, uniqBEmpty: Boolean): Unit = {
-    logger.info(
-      s"""Detailed analysis will not be computed:
-         |A: ${if (uniqAEmpty) "All rows matched" else "There is no other row in B look to inputA_differences"}
-         |B: ${if (uniqBEmpty) "All rows matched" else "There is no other row in A look to inputB_differences"}
-         |""".stripMargin
-    )
   }
 }

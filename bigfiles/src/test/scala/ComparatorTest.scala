@@ -27,119 +27,91 @@ class ComparatorTest extends AnyFunSuite {
     val tmp1: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (2, "three"), (3, "two")).toDF("id", "value")
 
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    assert(diff1.count() == 1)
-    assert(diff2.count() == 2)
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2)
+    assert(diffA.count() == 1)
+    assert(diffB.count() == 2)
   }
 
   test("test that comparator returns all rows if dataframes are completely different"){
     val tmp1: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq(("12af", 1003), ("12qw", 3004), ("123q", 3456)).toDF("id", "value")
 
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    assert(diff1.count() == 2)
-    assert(diff2.count() == 3)
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2)
+    assert(diffA.count() == 2)
+    assert(diffB.count() == 3)
   }
 
   test("test that comparator returns empty DataFrames if all rows are the same"){
     val tmp1: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
 
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    assert(diff1.count() == 0)
-    assert(diff2.count() == 0)
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2)
+    assert(diffA.count() == 0)
+    assert(diffB.count() == 0)
   }
 
   test("test that comparator returns empty DataFrames if all rows are the same but in different order"){
     val tmp1: DataFrame = Seq((2, "two"), (1, "one")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
 
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    assert(diff1.count() == 0)
-    assert(diff2.count() == 0)
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2)
+    assert(diffA.count() == 0)
+    assert(diffB.count() == 0)
   }
 
   test("test that comparator returns correct dataframes if one duplicate is present in one table"){
     val tmp1: DataFrame = Seq((1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
 
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2)
 
-    assert(diff1.count() == 1)
-    assert(diff2.count() == 0)
+    assert(diffA.count() == 1)
+    assert(diffB.count() == 0)
   }
 
   test("test that comparator returns correct dataframes if 2 duplicates are present in one table"){
     val tmp1: DataFrame = Seq((1, "one"), (1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
 
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2)
 
-    assert(diff1.count() == 2)
-    assert(diff2.count() == 0)
+    assert(diffA.count() == 2)
+    assert(diffB.count() == 0)
   }
 
 
   test("test that comparator returns correct dataframes if duplicates are present"){
     val tmp1: DataFrame = Seq((1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
     val tmp2: DataFrame = Seq((1, "one"), (1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2)
 
-    assert(diff1.count() == 0)
-    assert(diff2.count() == 1)
+    assert(diffA.count() == 0)
+    assert(diffB.count() == 1)
   }
 
+  test("test that comparator excludes columns correctly") {
+    val tmp1: DataFrame = Seq((1, "one", 100), (2, "two", 200)).toDF("id", "value", "extra")
+    val tmp2: DataFrame = Seq((1, "one", 999), (2, "two", 888)).toDF("id", "value", "extra")
 
-  //////////////////////////// createMetrics /////////////////////////////////////
+    // Without exclusion, datasets differ
+    val (diffA1, diffB1) = Comparator.compare(tmp1, tmp2)
+    assert(diffA1.count() == 2)
+    assert(diffB1.count() == 2)
 
-  test("test that createMetrics returns correct JSON string"){
-    val tmp1: DataFrame = Seq((1, "one"), (2, "two")).toDF("id", "value")
-    val tmp2: DataFrame = Seq((1, "one"), (2, "three"), (3, "two")).toDF("id", "value")
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2, Seq())
-    val expected = "{\"A\":{\"row count\":2," +
-                      "\"column count\":2," +
-                      "\"rows not present in B\":1," +
-                      "\"unique rows count\":2}," +
-                    "\"B\":{\"row count\":3," +
-                      "\"column count\":2," +
-                      "\"rows not present in A\":2," +
-                      "\"unique rows count\":3}," +
-                    "\"general\":{\"same records count\":1,\"same records percent to A\":50.0,\"excluded columns\":\"\"}}"
-    assert(metrics == expected)
+    // With exclusion of "extra" column, datasets are identical
+    val (diffA2, diffB2) = Comparator.compare(tmp1, tmp2, Seq("extra"))
+    assert(diffA2.count() == 0)
+    assert(diffB2.count() == 0)
   }
 
-  test("test that createMetrics returns correct JSON string, duplicates in data"){
-    val tmp1: DataFrame = Seq((1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
-    val tmp2: DataFrame = Seq((1, "one"), (1, "one"), (1, "one"), (2, "two")).toDF("id", "value")
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2, Seq())
-    val expected = "{\"A\":{\"row count\":3," +
-      "\"column count\":2," +
-      "\"rows not present in B\":0," +
-      "\"unique rows count\":2}," +
-      "\"B\":{\"row count\":4," +
-      "\"column count\":2," +
-      "\"rows not present in A\":1," +
-      "\"unique rows count\":2}," +
-      "\"general\":{\"same records count\":3,\"same records percent to A\":100.0,\"excluded columns\":\"\"}}"
-    assert(metrics == expected)
+  test("test that comparator excludes multiple columns correctly") {
+    val tmp1: DataFrame = Seq((1, "one", 100, "x"), (2, "two", 200, "y")).toDF("id", "value", "extra1", "extra2")
+    val tmp2: DataFrame = Seq((1, "one", 999, "z"), (2, "two", 888, "w")).toDF("id", "value", "extra1", "extra2")
+
+    // Excluding both extra columns makes datasets identical
+    val (diffA, diffB) = Comparator.compare(tmp1, tmp2, Seq("extra1", "extra2"))
+    assert(diffA.count() == 0)
+    assert(diffB.count() == 0)
   }
 
-  test("test that createMetrics returns correct JSON string with excluded columns"){
-    val tmp1: DataFrame = Seq(("one"), ("two")).toDF("value")
-    val tmp2: DataFrame = Seq(("one"), ("three"), ("two")).toDF("value")
-    val (diff1, diff2) = Comparator.compare(tmp1, tmp2)
-    val metrics = Comparator.createMetrics(tmp1, tmp2, diff1, diff2, Seq("id"))
-    val expected = "{\"A\":{\"row count\":2," +
-      "\"column count\":1," +
-      "\"rows not present in B\":0," +
-      "\"unique rows count\":2}," +
-      "\"B\":{\"row count\":3," +
-      "\"column count\":1," +
-      "\"rows not present in A\":1," +
-      "\"unique rows count\":3}," +
-      "\"general\":{\"same records count\":2,\"same records percent to A\":100.0,\"excluded columns\":\"id\"}}"
-    assert(metrics == expected)
-  }
 }

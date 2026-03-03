@@ -28,12 +28,10 @@ object DatasetComparisonHelper {
     *   columns to exclude
     * @param dfName
     *   name of the DataFrame
-    * @param spark
-    *   SparkSession
     * @return
     *   DataFrame with excluded columns
     */
-  def exclude(df: DataFrame, toExclude: Seq[String], dfName: String)(implicit spark: SparkSession): DataFrame = {
+  def exclude(df: DataFrame, toExclude: Seq[String], dfName: String): DataFrame = {
     if (toExclude.isEmpty) df
     else {
       logger.info(s"Excluding columns from the $dfName DataFrame")
