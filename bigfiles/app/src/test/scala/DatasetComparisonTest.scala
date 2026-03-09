@@ -28,7 +28,7 @@ import scala.reflect.io.Directory
 
 class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter{
   implicit val spark: SparkSession = SparkTestSession.spark
-  val folder: String = Paths.get("app/src/test/resources/").toAbsolutePath.toString
+  val folder: String = Paths.get("src/test/resources/").toAbsolutePath.toString
   val testOutput: String = folder + "/testoutput"
 
 
