@@ -34,15 +34,15 @@ object MetricsSerializer {
       ("column count"          -> metrics.columnCountA) ~
       ("rows not present in B" -> metrics.diffCountA) ~
       ("unique rows count"     -> metrics.uniqueRowCountA)) ~
-    ("B" ->
-      ("row count"             -> metrics.rowCountB) ~
-      ("column count"          -> metrics.columnCountB) ~
-      ("rows not present in A" -> metrics.diffCountB) ~
-      ("unique rows count"     -> metrics.uniqueRowCountB)) ~
-    ("general" ->
-      ("same records count"        -> metrics.sameRecordsCount) ~
-      ("same records percent to A" -> metrics.sameRecordsPercentToA) ~
-      ("excluded columns"          -> metrics.excludedColumns.mkString(", ")))
+      ("B" ->
+        ("row count"             -> metrics.rowCountB) ~
+        ("column count"          -> metrics.columnCountB) ~
+        ("rows not present in A" -> metrics.diffCountB) ~
+        ("unique rows count"     -> metrics.uniqueRowCountB)) ~
+      ("general" ->
+        ("same records count"        -> metrics.sameRecordsCount) ~
+        ("same records percent to A" -> metrics.sameRecordsPercentToA) ~
+        ("excluded columns"          -> metrics.excludedColumns.mkString(", ")))
   }
 
   /** Serializes ComparisonMetrics to a compact JSON string.

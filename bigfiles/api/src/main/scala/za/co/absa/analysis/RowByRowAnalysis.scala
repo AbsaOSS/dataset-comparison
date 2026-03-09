@@ -32,7 +32,8 @@ object RowByRowAnalysis {
     * @param threshold
     *   Maximum number of differences to analyze per dataset
     * @return
-    *   AnalysisResult indicating the outcome: Success with diffs, DatasetsIdentical, OneSidedDifference, or ThresholdExceeded
+    *   AnalysisResult indicating the outcome: Success with diffs, DatasetsIdentical, OneSidedDifference, or
+    *   ThresholdExceeded
     */
   def analyze(diffA: DataFrame, diffB: DataFrame, threshold: Int): AnalysisResult = {
     val diffCountA = diffA.count()

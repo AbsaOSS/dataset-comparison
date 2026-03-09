@@ -51,4 +51,3 @@ object AnalysisResult {
     */
   case class ThresholdExceeded(diffCountA: Long, diffCountB: Long, threshold: Int) extends AnalysisResult
 }
-

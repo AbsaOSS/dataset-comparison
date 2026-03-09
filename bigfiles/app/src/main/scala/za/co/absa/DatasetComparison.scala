@@ -49,7 +49,8 @@ object DatasetComparison {
     IOHandler.dfWrite(Paths.get(out, "inputA_differences").toString, diffA, arguments.outFormat)
     IOHandler.dfWrite(Paths.get(out, "inputB_differences").toString, diffB, arguments.outFormat)
 
-    val metrics = ComparisonMetricsCalculator.calculate(rawDataA, rawDataB, diffA, diffB, arguments.exclude)
+    val metrics = ComparisonMetricsCalculator
+      .calculate(rawDataA, rawDataB, diffA, diffB, arguments.exclude)
       .getOrElse(throw new RuntimeException("Failed to calculate metrics"))
     val metricsJson = MetricsSerializer.serialize(metrics)
     IOHandler.jsonWrite(Paths.get(out, "metrics.json").toString, metricsJson)

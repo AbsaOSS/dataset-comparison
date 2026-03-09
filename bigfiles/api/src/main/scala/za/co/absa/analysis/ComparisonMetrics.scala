@@ -50,4 +50,3 @@ case class ComparisonMetrics(
     sameRecordsPercentToA: Double,
     excludedColumns: Seq[String]
 )
-
