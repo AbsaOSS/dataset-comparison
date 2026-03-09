@@ -64,7 +64,9 @@ object RowByRowAnalysis {
     * @param bestRowRight
     *   The best matching row found so far
     * @return
-    *   AnalyseStat containing the best match statistics
+    *   best match statistics. This contains the best score, the best row from DataFrame Right and mask which has 0 and
+    *   1, 1 means the column is different. Mask represents the comparison between two rows where 0 means they are the
+    *   same, while 1 means they differ. The sequence then gives the representation of the whole row of differences.
     */
   @tailrec
   private def getBest(
