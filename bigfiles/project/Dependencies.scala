@@ -71,19 +71,19 @@ object Dependencies {
 
   /** Dependencies for the api module — pure comparison logic, no CLI concerns. */
   def apiDependencies(scalaVersion: String): Seq[ModuleID] = {
-    lazy val slf4jApi  = "org.slf4j"  % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
+    lazy val slf4jApi  = "org.slf4j"      % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
     // Required for scala 2.11 + spark 2.4.7
     lazy val snappy  = "org.xerial.snappy"             % "snappy-java"          % "1.1.8.4"
     lazy val jackson = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Versions.jackson211_212 % Provided
 
     Seq(
-      "org.apache.spark"  %% "spark-core"    % sparkVersionForScala(scalaVersion) % Provided,
-      "org.apache.spark"  %% "spark-sql"     % sparkVersionForScala(scalaVersion) % Provided,
-      "org.apache.hadoop"  % "hadoop-common" % hadoopVersionForScala(scalaVersion),
-      "org.apache.hadoop"  % "hadoop-client" % hadoopVersionForScala(scalaVersion),
-      "org.apache.hadoop"  % "hadoop-hdfs"   % hadoopVersionForScala(scalaVersion),
-      "com.lihaoyi"       %% "upickle"       % unpickleVersionForScala(scalaVersion),
+      "org.apache.spark" %% "spark-core"    % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.spark" %% "spark-sql"     % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.hadoop" % "hadoop-common" % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-client" % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-hdfs"   % hadoopVersionForScala(scalaVersion),
+      "com.lihaoyi"      %% "upickle"       % unpickleVersionForScala(scalaVersion),
       slf4jApi,
       scalatest,
       snappy,
@@ -103,13 +103,13 @@ object Dependencies {
     lazy val jackson = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Versions.jackson211_212 % Provided
 
     Seq(
-      "org.apache.spark"  %% "spark-core"     % sparkVersionForScala(scalaVersion) % Provided,
-      "org.apache.spark"  %% "spark-sql"      % sparkVersionForScala(scalaVersion) % Provided,
-      "org.apache.hadoop"  % "hadoop-common"  % hadoopVersionForScala(scalaVersion),
-      "org.apache.hadoop"  % "hadoop-client"  % hadoopVersionForScala(scalaVersion),
-      "org.apache.hadoop"  % "hadoop-hdfs"    % hadoopVersionForScala(scalaVersion),
-      "org.json4s"        %% "json4s-native"  % jsonVersionForScala(scalaVersion),
-      "org.json4s"        %% "json4s-jackson" % jsonVersionForScala(scalaVersion),
+      "org.apache.spark" %% "spark-core"     % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.spark" %% "spark-sql"      % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.hadoop" % "hadoop-common"  % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-client"  % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-hdfs"    % hadoopVersionForScala(scalaVersion),
+      "org.json4s"       %% "json4s-native"  % jsonVersionForScala(scalaVersion),
+      "org.json4s"       %% "json4s-jackson" % jsonVersionForScala(scalaVersion),
       fansi,
       scopt,
       slf4jApi,
@@ -120,4 +120,3 @@ object Dependencies {
     )
   }
 }
-
