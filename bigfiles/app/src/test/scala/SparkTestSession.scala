@@ -26,5 +26,5 @@ object SparkTestSession {
     .master("local[*]")
     .getOrCreate()
 
-  val FS_URI: String =  new File("src/test/resources").getAbsoluteFile.toURI.toString
+  val FS_URI: String =  new File("app/src/test/resources").getAbsoluteFile.toURI.toString
 }
