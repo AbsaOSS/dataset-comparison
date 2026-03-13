@@ -57,5 +57,3 @@ lazy val root = (project in file("."))
     // Prevent root from being published or assembled
     publish / skip := true
   )
-
-
