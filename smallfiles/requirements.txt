@@ -1,12 +1,14 @@
 black==26.1.0
-coverage==7.6.1
+coverage==7.10.6
 iniconfig==2.0.0
 mypy==1.15.0
 numpy==2.1.2
 packaging==24.1
 pandas==2.2.3
+pandas-stubs==3.0.0.260204
 pluggy==1.5.0
 pytest==8.3.3
+pytest-cov==7.0.0
 python-dateutil==2.9.0.post0
 pytz==2024.2
 six==1.16.0
