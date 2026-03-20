@@ -152,7 +152,7 @@ jobs:
         run: mypy .
 
   unit-tests:
-    name: Pytest Unit Tests with Coverage
+    name: Pytest Tests with Coverage
     needs: detect
     if: needs.detect.outputs.python_changed == 'true'
     runs-on: ubuntu-latest
@@ -173,7 +173,7 @@ jobs:
         run: pip install -r smallfiles/requirements.txt
 
       - name: Check code coverage with Pytest
-        run: pytest --cov=. -v smallfiles/test/ --cov-fail-under=80
+        run: pytest --cov=smallfiles -v smallfiles/test/ --cov-fail-under=80
 
   noop:
     name: No Operation
