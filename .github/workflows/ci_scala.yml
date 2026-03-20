@@ -94,8 +94,7 @@ jobs:
         uses: MoranaApps/jacoco-report@54bfe284d1119dc917dddba80517c54c5bcf3627
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
-          paths: |
-            bigfiles/target/**/jacoco/report/jacoco.xml
+          paths: bigfiles/target/scala-2.12/jacoco-report/jacoco.xml
           sensitivity: "detail"
           comment-mode: 'single'
           min-coverage-overall: ${{ env.coverage-overall }}
