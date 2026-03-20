@@ -81,10 +81,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Scala
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654
+        uses: olafurpg/setup-scala@32ffa16635ff8f19cc21ea253a987f0fdf29844c
         with:
-          distribution: temurin
-          java-version: '8'
+          java-version: "adopt@1.8"
 
       - name: Build and run tests
         continue-on-error: true
@@ -104,6 +103,10 @@ jobs:
           min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
           skip-unchanged: false
 
+      - name: Fail if tests failed
+        if: steps.jacocorun.outcome != 'success'
+        run: exit 1
+
   format-check:
     name: Format Check
     needs: detect
@@ -121,10 +124,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Setup Scala
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654
+        uses: olafurpg/setup-scala@32ffa16635ff8f19cc21ea253a987f0fdf29844c
         with:
-          distribution: temurin
-          java-version: '8'
+          java-version: "adopt@1.8"
 
       - name: Run scalafmt And Print Diff
         continue-on-error: false
