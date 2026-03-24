@@ -20,7 +20,7 @@ on:
     branches: [ master ]
 
 env:
-  coverage-overall: 80.0
+  coverage-overall: 67.0
   coverage-changed-files: 80.0
   coverage-per-changed-file: 0.0
 

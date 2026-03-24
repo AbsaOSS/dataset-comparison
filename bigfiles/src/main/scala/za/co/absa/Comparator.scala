@@ -42,7 +42,6 @@ object Comparator {
     *   JSON string with metrics
     */
   def createMetrics(
-
       dataA: DataFrame,
       dataB: DataFrame,
       diffA: DataFrame,

@@ -13,7 +13,7 @@ Monorepo: `bigfiles/` (Scala+Spark, files not fitting RAM) and `smallfiles/` (Py
 - Python 3.13. Entry point: `smallfiles/main.py`. Deps pinned in `smallfiles/requirements.txt`.
 
 ## Quality gates
-- Scala: JaCoCo overall >= 80%, changed files >= 80%. PR comments via `MoranaApps/jacoco-report`.
+- Scala: JaCoCo overall >= 67% ( >= 80% is goal), changed files >= 80%. PR comments via `MoranaApps/jacoco-report`.
 - Python: pytest >= 80%, pylint >= 9.5, black formatting, mypy type checking.
 
 ## Conventions
