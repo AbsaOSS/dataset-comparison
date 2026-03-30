@@ -59,9 +59,14 @@ spark.hadoop.fs.defaultFS          hdfs://localhost:9999/ # set your hdfs uri
 
 ### Requirements
 
-- scala 2.12
-- spark 3.5.1
-- java 11.0.24-amzn
+Two Scala versions are supported, each paired with a different Spark version:
+
+| Scala | Spark | Java           | Hadoop |
+|-------|-------|----------------|--------|
+| 2.12.20 (default) | 3.5.3 | 11.0.24-amzn | 3.3.5 |
+| 2.11.12 | 2.4.7 | 8.0.422-amzn  | 2.6.5 |
+
+The default build targets **Scala 2.12**.
 
 more requirements are in [Dependency](project/Dependencies.scala) file
 
@@ -84,9 +89,10 @@ sdk env install
 ## How to run tests
 
 
-| sbt command | test type | info                                   |
-| ----------- |-----------|----------------------------------------|
-| `sbt test`  | ...       | It will run tests in test/scala folder |
+| sbt command  | Test                 | Info                                                                                                                 |
+|--------------|----------------------|----------------------------------------------------------------------------------------------------------------------|
+| `sbt test`   | Unit & Integration   | It will run tests in bigfiles/src/test/scala folder                                                                  |
+| `sbt jacoco` | Jacoco code coverage | Runs all possible tests with code coverage - i.e. you need environment setup for all previous unit/integration tests |
 
 
 ---------

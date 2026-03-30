@@ -17,105 +17,168 @@ name: CI Python
 
 on:
   pull_request:
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+concurrency:
+  group: static-python-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
-  test-smallfiles:
-    name: Test Small files
+  detect:
+    name: Python Changes Detection
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: smallfiles
+    outputs:
+      python_changed: ${{ steps.changes.outputs.python_changed }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:
           persist-credentials: false
+          fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install dependencies
+      - name: Check if Python files changed
+        id: changes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          pip install -r requirements.txt
-          pip install coverage pytest
+          set -euo pipefail
 
-      - name: Run tests
-        run: coverage run -m pytest test/
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(gh api \
+              "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+              --jq '.[].filename | select(endswith(".py") or . == "smallfiles/requirements.txt")')
+          else
+            CHANGED_FILES=$(git diff --name-only "${{ github.sha }}~1" "${{ github.sha }}" -- '*.py' 'smallfiles/requirements.txt')
+          fi
 
-      - name: Show coverage
-        run: coverage report -m --omit=".*.ipynb"
+          if [[ -n "$CHANGED_FILES" ]]; then
+            echo "python_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "python_changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Create coverage file
-        if: github.event_name == 'pull_request'
-        run: coverage xml
-
-      - name: Get Cover
-        if: github.event_name == 'pull_request'
-        uses: orgoro/coverage@v3.1
-        with:
-          coverageFile: smallfiles/coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          thresholdAll: 0.7
-          thresholdNew: 0.9
-
-      - uses: actions/upload-artifact@v4
-        if: github.event_name == 'pull_request'
-        with:
-          name: coverage
-          path: coverage.xml
-          retention-days: 1
-
-  python-format-check:
-    name: Python Format Check
+  pylint-analysis:
+    name: Pylint Static Code Analysis
+    needs: detect
+    if: needs.detect.outputs.python_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install dependencies
+        run: pip install -r smallfiles/requirements.txt
+
+      - name: Analyze code with Pylint
+        id: analyze-code
         run: |
-          pip install black
+          pylint_score=$(pylint $(git ls-files '*.py')| grep 'rated at' | awk '{print $7}' | cut -d'/' -f1)
+          echo "PYLINT_SCORE=$pylint_score" >> $GITHUB_ENV
+
+      - name: Check Pylint score
+        run: |
+          if (( $(echo "$PYLINT_SCORE < 9.5" | bc -l) )); then
+            echo "Failure: Pylint score is below 9.5 (project score: $PYLINT_SCORE)."
+            exit 1
+          else
+            echo "Success: Pylint score is above 9.5 (project score: $PYLINT_SCORE)."
+          fi
+
+  black-check:
+    name: Black Format Check
+    needs: detect
+    if: needs.detect.outputs.python_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r smallfiles/requirements.txt
 
       - name: Check code format with Black
-        run: |
-          black --check $(git ls-files '*.py')
+        id: check-format
+        run: black --check $(git ls-files '*.py')
 
-
-
-  python-static-analysis:
-    name: Python Static Analysis
+  mypy-check:
+    name: Mypy Type Check
+    needs: detect
+    if: needs.detect.outputs.python_changed == 'true'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: smallfiles
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          python-version: '3.11'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install pylint
+        run: pip install -r smallfiles/requirements.txt
 
-      - name: Analysing the code with pylint
-        run: |
-          pylint $(git ls-files '*.py')
+      - name: Check types with Mypy
+        id: check-types
+        run: mypy .
+
+  unit-tests:
+    name: Pytest Tests with Coverage
+    needs: detect
+    if: needs.detect.outputs.python_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -r smallfiles/requirements.txt
+
+      - name: Check code coverage with Pytest
+        run: pytest --cov=smallfiles -v smallfiles/test/ --cov-fail-under=80
+
+  noop:
+    name: No Operation
+    needs: detect
+    if: needs.detect.outputs.python_changed != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No changes in the *.py files — passing."

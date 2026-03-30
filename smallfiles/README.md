@@ -45,3 +45,12 @@ For specific test
 # pytest name_of_test_file.py
  pytest test/test_version.py
 ```
+
+## Quality gates
+
+| Tool | Command | Gate |
+|------|---------|------|
+| pytest | `pytest --cov=. --cov-fail-under=80` | coverage >= 80% |
+| pylint | `pylint $(git ls-files '*.py')` | score >= 9.5 |
+| black | `black --check $(git ls-files '*.py')` | formatting enforced |
+| mypy | `mypy .` | type checking enforced |

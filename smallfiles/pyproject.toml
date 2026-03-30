@@ -2,3 +2,7 @@
 line-length = 160
 target-version = ['py311']
 force-exclude = '''test'''
+
+[tool.coverage.run]
+omit = ["test/*"]
+
