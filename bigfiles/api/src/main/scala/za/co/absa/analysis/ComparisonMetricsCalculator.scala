@@ -30,7 +30,7 @@ object ComparisonMetricsCalculator {
       diffA: DataFrame,
       diffB: DataFrame,
       excludedColumns: Seq[String]
-  ): Option[ComparisonMetrics] = {
+  ): ComparisonMetrics = {
 
     logger.info("Computing comparison metrics")
 
@@ -59,20 +59,18 @@ object ComparisonMetricsCalculator {
       0.0
     }
 
-    Some(
-      ComparisonMetrics(
-        rowCountA = rowCountA,
-        rowCountB = rowCountB,
-        columnCountA = dataA.columns.length,
-        columnCountB = dataB.columns.length,
-        diffCountA = diffCountA,
-        diffCountB = diffCountB,
-        uniqueRowCountA = uniqRowCountA,
-        uniqueRowCountB = uniqRowCountB,
-        sameRecordsCount = sameRecords,
-        sameRecordsPercentToA = sameRecordsPercent,
-        excludedColumns = excludedColumns
-      )
+    ComparisonMetrics(
+      rowCountA = rowCountA,
+      rowCountB = rowCountB,
+      columnCountA = dataA.columns.length,
+      columnCountB = dataB.columns.length,
+      diffCountA = diffCountA,
+      diffCountB = diffCountB,
+      uniqueRowCountA = uniqRowCountA,
+      uniqueRowCountB = uniqRowCountB,
+      sameRecordsCount = sameRecords,
+      sameRecordsPercentToA = sameRecordsPercent,
+      excludedColumns = excludedColumns
     )
   }
 }

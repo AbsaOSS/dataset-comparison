@@ -29,10 +29,7 @@ class ComparisonMetricsCalculatorTest extends AnyFunSuite {
 
     val diffA = Seq.empty[(Int, String)].toDF("id", "value")
     val diffB = Seq.empty[(Int, String)].toDF("id", "value")
-    val metricsOpt = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
-
-    assert(metricsOpt.isDefined)
-    val metrics = metricsOpt.get
+    val metrics = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
 
     assert(metrics.rowCountA == 2)
     assert(metrics.rowCountB == 2)
@@ -53,10 +50,7 @@ class ComparisonMetricsCalculatorTest extends AnyFunSuite {
 
     val diffA = Seq((2, "two")).toDF("id", "value")
     val diffB = Seq((2, "three"), (3, "two")).toDF("id", "value")
-    val metricsOpt = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
-
-    assert(metricsOpt.isDefined)
-    val metrics = metricsOpt.get
+    val metrics = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
 
     assert(metrics.rowCountA == 2)
     assert(metrics.rowCountB == 3)
@@ -77,10 +71,7 @@ class ComparisonMetricsCalculatorTest extends AnyFunSuite {
 
     val diffA = Seq.empty[(Int, String)].toDF("id", "value")
     val diffB = Seq((1, "one")).toDF("id", "value")
-    val metricsOpt = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
-
-    assert(metricsOpt.isDefined)
-    val metrics = metricsOpt.get
+    val metrics = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
 
     assert(metrics.rowCountA == 3)
     assert(metrics.rowCountB == 4)
@@ -101,10 +92,7 @@ class ComparisonMetricsCalculatorTest extends AnyFunSuite {
 
     val diffA = Seq.empty[String].toDF("value")
     val diffB = Seq("three").toDF("value")
-    val metricsOpt = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq("id"))
-
-    assert(metricsOpt.isDefined)
-    val metrics = metricsOpt.get
+    val metrics = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq("id"))
 
     assert(metrics.rowCountA == 2)
     assert(metrics.rowCountB == 3)
@@ -125,10 +113,7 @@ class ComparisonMetricsCalculatorTest extends AnyFunSuite {
 
     val diffA = Seq((1, "one"), (2, "two")).toDF("id", "value")
     val diffB = Seq(("12af", 1003), ("12qw", 3004), ("123q", 3456)).toDF("id", "value")
-    val metricsOpt = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
-
-    assert(metricsOpt.isDefined)
-    val metrics = metricsOpt.get
+    val metrics = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq())
 
     assert(metrics.rowCountA == 2)
     assert(metrics.rowCountB == 3)
@@ -144,10 +129,7 @@ class ComparisonMetricsCalculatorTest extends AnyFunSuite {
 
     val diffA = Seq.empty[(Int, String, Int)].toDF("id", "value", "extra")
     val diffB = Seq.empty[(Int, String, Int)].toDF("id", "value", "extra")
-    val metricsOpt = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq("extra"))
-
-    assert(metricsOpt.isDefined) // Should have metrics even when datasets are identical after exclusion
-    val metrics = metricsOpt.get
+    val metrics = ComparisonMetricsCalculator.calculate(tmp1, tmp2, diffA, diffB, Seq("extra"))
 
     assert(metrics.diffCountA == 0)
     assert(metrics.diffCountB == 0)

@@ -51,7 +51,7 @@ object DatasetComparison {
 
     val metrics = ComparisonMetricsCalculator
       .calculate(rawDataA, rawDataB, diffA, diffB, arguments.exclude)
-      .getOrElse(throw new RuntimeException("Failed to calculate metrics"))
+
     val metricsJson = MetricsSerializer.serialize(metrics)
     IOHandler.jsonWrite(Paths.get(out, "metrics.json").toString, metricsJson)
 
