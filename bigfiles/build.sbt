@@ -20,6 +20,9 @@ import sbtassembly.MergeStrategy
 
 import java.time.LocalDateTime
 
+enablePlugins(GitVersioning, GitBranchPrompt)
+enablePlugins(ScalafmtPlugin)
+
 lazy val scala212               = "2.12.20"
 lazy val scala211               = "2.11.12"
 lazy val supportedScalaVersions = List(scala211, scala212)
@@ -28,10 +31,22 @@ ThisBuild / version      := "0.1.0"
 ThisBuild / scalaVersion := scala212
 ThisBuild / organization := "za.co.absa"
 
-lazy val root = (project in file("."))
-  .enablePlugins(JacocoFilterPlugin)
-  .enablePlugins(GitVersioning, GitBranchPrompt)
-  .enablePlugins(ScalafmtPlugin)
+// ── api module ────────────────────────────────────────────────────────────────
+// Pure comparison logic and data models. No CLI or I/O concerns.
+lazy val api = (project in file("api"))
+  .settings(
+    name               := "dataset-comparison-api",
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies ++= apiDependencies(scalaVersion.value),
+    javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
+    Test / fork          := true,
+    Test / baseDirectory := (ThisBuild / baseDirectory).value / "api"
+  )
+
+// ── app module ────────────────────────────────────────────────────────────────
+// CLI entry point, argument parsing, I/O and serialization. Depends on api.
+lazy val app = (project in file("app"))
+  .dependsOn(api)
   .settings(
     name                 := "dataset-comparison",
     crossScalaVersions   := supportedScalaVersions,
@@ -51,6 +66,9 @@ lazy val root = (project in file("."))
 
 // ── root aggregate ────────────────────────────────────────────────────────────
 lazy val root = (project in file("."))
+  .enablePlugins(JacocoFilterPlugin)
+  .enablePlugins(GitVersioning, GitBranchPrompt)
+  .enablePlugins(ScalafmtPlugin)
   .aggregate(api, app)
   .settings(
     name := "dataset-comparison-root",
