@@ -10,9 +10,9 @@
   * specific language governing permissions and limitations under the License.
   */
 
-addSbtPlugin("org.jetbrains.scala" % "sbt-ide-settings" % "1.1.2")
-addSbtPlugin("com.github.sbt" % "sbt-git"      % "2.0.0")
-addSbtPlugin("org.scalameta"  % "sbt-scalafmt" % "2.4.6")
+addSbtPlugin("org.jetbrains.scala"  % "sbt-ide-settings"         % "1.1.2")
+addSbtPlugin("com.github.sbt"       % "sbt-git"                  % "2.0.0")
+addSbtPlugin("org.scalameta"        % "sbt-scalafmt"             % "2.4.6")
 addSbtPlugin("io.github.moranaapps" % "jacoco-method-filter-sbt" % "2.0.1")
 
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.2.0")
