@@ -15,22 +15,18 @@
  **/
 
 import za.co.absa.parser.{ArgsParser, Arguments, DiffComputeType, OutputFormatType}
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.File
-import java.net.URI
 
-class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
-  val FS_URI: String = SparkTestSession.FS_URI
-  val FS: FileSystem = FileSystem.get(new URI(FS_URI), new Configuration())
+class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll {
 
-  override def beforeAll(): Unit = {
-    FS.setWorkingDirectory(new Path(FS_URI))
-  }
+  implicit val spark: SparkSession = SparkTestSession.spark
+  import spark.implicits._
+
+  val resourcesDir: String = new File(getClass.getResource("/inputA.txt").toURI).getParent
 
   test("test that ArgParser throws exception if no arguments are passed") {
     val args = Array[String]()
@@ -47,9 +43,8 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
     assertThrows[IllegalArgumentException](ArgsParser.getArgs(args))
   }
 
-
   test("test that we can not pass more then one output, it will throw exception") {
-    val args = Array[String]("-o", "out", "-o", "out2",  "--inputA", "file1", "--inputB", "file2")
+    val args = Array[String]("-o", "out", "-o", "out2", "--inputA", "file1", "--inputB", "file2")
     assertThrows[IllegalArgumentException](ArgsParser.getArgs(args))
   }
 
@@ -88,6 +83,7 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
     val res2 = ArgsParser.getArgs(args2)
     assert(res2.diff == DiffComputeType.Row)
   }
+
   test("test diff option will be set to None if diff option is not passed") {
     val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2")
     val res = ArgsParser.getArgs(args)
@@ -127,9 +123,6 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
     assert(res.outFormat == OutputFormatType.Parquet)
   }
 
-
-
-
   test("test that exclude option is correctly parsed") {
     val args = Array[String]("-o", "out", "--inputA", "file1", "--inputB", "file2", "--exclude", "col1")
     val res = ArgsParser.getArgs(args)
@@ -149,29 +142,10 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
   }
 
   ////////////////////////////////Validate//////////////////////////////////////////
-//  val HDFS_URI = "hdfs://localhost:9999/"
-//  override def beforeAll(): Unit = {
-//    val hdfs = FileSystem.get(new URI(HDFS_URI), new Configuration())
-//    val dirPath = "testDir"
-//    hdfs.mkdirs(new Path(dirPath))
-//    hdfs.copyFromLocalFile(new Path("src/test/resources/out"), new Path(dirPath + "/out"))
-//    hdfs.copyFromLocalFile(new Path("src/test/resources/inputA.txt"), new Path(dirPath + "/inputA.txt"))
-//    hdfs.copyFromLocalFile(new Path("src/test/resources/inputB.txt"), new Path(dirPath + "/inputB.txt"))
-//  }
-//
-//  test("test hadoop ...") {
-//    val file = "/foo/test.csv"
-//    val args = Arguments("/foo/out", file, file, HDFS_URI)
-//    assert(ArgsParser.validate(args))
-//  }
-
-  implicit val spark: SparkSession = SparkTestSession.spark
-  import spark.implicits._
-
 
   test("test that validate throws exception if inputA does not exist") {
-    val wrongFile = "file1"
-    val args = Arguments("out", wrongFile, "inputB.txt")
+    val wrongFile = resourcesDir + "/nonexistent_inputA"
+    val args = Arguments("nonexistent_output", wrongFile, resourcesDir + "/inputB.txt")
     val exception = intercept[IllegalArgumentException] {
       ArgsParser.validate(args)
     }
@@ -179,8 +153,8 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
   }
 
   test("test that validate throws exception if inputB does not exist") {
-    val wrongFile = "file2"
-    val args = Arguments("out", "inputA.txt", wrongFile)
+    val wrongFile = resourcesDir + "/nonexistent_inputB"
+    val args = Arguments("nonexistent_output", resourcesDir + "/inputA.txt", wrongFile)
     val exception = intercept[IllegalArgumentException] {
       ArgsParser.validate(args)
     }
@@ -188,16 +162,20 @@ class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll{
   }
 
   test("test that validate throws exception if output exists") {
-    val wrongFile = "out"
-    val args = Arguments(wrongFile, "inputA.txt", "inputB.txt")
+    val existingOutput = resourcesDir + "/out"   // "out/" directory exists in test resources
+    val args = Arguments(existingOutput, resourcesDir + "/inputA.txt", resourcesDir + "/inputB.txt")
     val exception = intercept[IllegalArgumentException] {
       ArgsParser.validate(args)
     }
-    assert(exception.getMessage == s"Output ${wrongFile} already exist")
+    assert(exception.getMessage == s"Output ${existingOutput} already exist")
   }
 
   test("test that validate returns true if all files exist") {
-    val args = Arguments("output", "inputA.txt", "inputB.txt")
+    val args = Arguments(
+      resourcesDir + "/nonexistent_output",
+      resourcesDir + "/inputA.txt",
+      resourcesDir + "/inputB.txt"
+    )
     assert(ArgsParser.validate(args))
   }
 }

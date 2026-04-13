@@ -34,6 +34,7 @@ ThisBuild / organization := "za.co.absa"
 // ── api module ────────────────────────────────────────────────────────────────
 // Pure comparison logic and data models. No CLI or I/O concerns.
 lazy val api = (project in file("api"))
+  .enablePlugins(JacocoFilterPlugin)
   .settings(
     name               := "dataset-comparison-api",
     crossScalaVersions := supportedScalaVersions,
@@ -46,6 +47,7 @@ lazy val api = (project in file("api"))
 // ── app module ────────────────────────────────────────────────────────────────
 // CLI entry point, argument parsing, I/O and serialization. Depends on api.
 lazy val app = (project in file("app"))
+  .enablePlugins(JacocoFilterPlugin)
   .dependsOn(api)
   .settings(
     name                 := "dataset-comparison",

@@ -26,7 +26,7 @@ import org.json4s.JsonDSL._
 import upickle.default._
 
 import java.io.File
-import java.nio.file.Paths
+import java.nio.file.{Files, Paths}
 import scala.io.Source
 import scala.reflect.io.Directory
 
@@ -35,16 +35,18 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
   implicit val spark: SparkSession = SparkTestSession.spark
 
   import spark.implicits._
-  val folder = "testoutput"
-  val filePath: String = folder + "/sample.parquet"
-  val filePathCsv: String = folder + "/sample.csv"
-  val jsonPath: String = folder +"/sample.json"
+  var tempDir: File = _
 
+  before {
+    tempDir = Files.createTempDirectory("iohandler-test").toFile
+  }
+
+  def filePath: String    = tempDir.getAbsolutePath + "/sample.parquet"
+  def filePathCsv: String = tempDir.getAbsolutePath + "/sample.csv"
+  def jsonPath: String    = tempDir.getAbsolutePath + "/sample.json"
 
   after {
-    // Clean up
-    val dir = new Directory(new File("src/test/resources/" + folder))
-    dir.deleteRecursively()
+    new Directory(tempDir).deleteRecursively()
   }
 
   test("test that sparkRead reads a Parquet file into a DataFrame") {
@@ -138,11 +140,6 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
         )
       )
     )
-
-    val dir = new File(folder)
-    if (!dir.exists()) {
-      dir.mkdirs()
-    }
 
     IOHandler.rowDiffWriteAsJson(Paths.get(jsonPath).toString, data)
 
