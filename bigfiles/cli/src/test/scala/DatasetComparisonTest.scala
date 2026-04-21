@@ -19,37 +19,47 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import testutils.SparkTestSession
 
 import java.io.File
-import java.nio.file.Paths
+import java.nio.file.Files
 import scala.reflect.io.Directory
 
+class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter {
 
-
-class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter{
   implicit val spark: SparkSession = SparkTestSession.spark
-  val folder: String = Paths.get("src/test/resources/").toAbsolutePath.toString
-  val testOutput: String = folder + "/testoutput"
-
 
   import spark.implicits._
 
-  val inputAResult : DataFrame = Seq(("Lisa", 27, "Madrid"), ("Luck", 33, "Geneve"), ("Marco", 47, "Rome"))
-                                .toDF("Name", "Age", "City")
+  // Input resources resolved from classpath — independent of working directory
+  val resourcesDir: String = new File(getClass.getResource("/namesA.parquet").toURI).getParent
 
-  val inputBResult : DataFrame = Seq(("Lisa", 20, "Madrid"), ("Luck", 30, "New York"), ("Marco", 47, "Geneve"))
-                                .toDF("Name", "Age", "City")
+  // Output written to a fresh temp dir per test — independent of working directory
+  var tempDir: File = _
 
-  after {
-    val dir = new Directory(new File(testOutput))
-    dir.deleteRecursively()
+  before {
+    tempDir = Files.createTempDirectory("dataset-comparison-test").toFile
   }
 
+  def testOutput: String = tempDir.getAbsolutePath + "/output"
+
+  val inputAResult: DataFrame = Seq(("Lisa", 27, "Madrid"), ("Luck", 33, "Geneve"), ("Marco", 47, "Rome"))
+    .toDF("Name", "Age", "City")
+
+  val inputBResult: DataFrame = Seq(("Lisa", 20, "Madrid"), ("Luck", 30, "New York"), ("Marco", 47, "Geneve"))
+    .toDF("Name", "Age", "City")
+
+  after {
+    new Directory(tempDir).deleteRecursively()
+  }
 
   test("test that DatasetComparison generates the correct output files") {
-    val args = Array[String]("-o", testOutput, "--inputA", folder + "/namesA.parquet", "--inputB", folder + "/namesB.parquet")
+    val args = Array[String](
+      "-o", testOutput,
+      "--inputA", resourcesDir + "/namesA.parquet",
+      "--inputB", resourcesDir + "/namesB.parquet"
+    )
     DatasetComparison.main(args)
-
 
     val inputADifferences = new File(testOutput + "/inputA_differences")
     val inputBDifferences = new File(testOutput + "/inputB_differences")
@@ -63,26 +73,27 @@ class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfte
     val inputBDifferencesDf = spark.read.parquet(inputBDifferences.getAbsolutePath)
     val metricsDf = spark.read.json(metricsJson.getAbsolutePath)
 
-    // check that inputADifferencesDf is the same as inputAResult
     val AClean = inputADifferencesDf.drop("cps_comparison_hash")
     assert(AClean.count() == inputAResult.count())
     assert(AClean.columns sameElements inputAResult.columns)
     assert(AClean.exceptAll(inputAResult).count() == 0)
 
-    // check that inputBDifferencesDf is the same as inputBResult
     val BClean = inputBDifferencesDf.drop("cps_comparison_hash")
     assert(BClean.count() == inputBResult.count())
     assert(BClean.columns sameElements inputBResult.columns)
     assert(BClean.exceptAll(inputBResult).count() == 0)
 
-    // check that metricsDf is not empty
     assert(metricsDf.count() > 0)
   }
 
   test("test that DatasetComparison generates the correct output files with --diff") {
-    val args = Array[String]("-o", testOutput, "--inputA", folder + "/namesA.parquet", "--inputB", folder + "/namesB.parquet", "--diff", "Row")
+    val args = Array[String](
+      "-o", testOutput,
+      "--inputA", resourcesDir + "/namesA.parquet",
+      "--inputB", resourcesDir + "/namesB.parquet",
+      "--diff", "Row"
+    )
     DatasetComparison.main(args)
-
 
     val inputADifferences = new File(testOutput + "/inputA_differences")
     val inputBDifferences = new File(testOutput + "/inputB_differences")
@@ -102,26 +113,25 @@ class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfte
     val AChangesToBDf = spark.read.json(AToBChanges.getAbsolutePath)
     val BChangesToADf = spark.read.json(BToAChanges.getAbsolutePath)
 
-    // check that inputADifferencesDf is the same as inputAResult
     val AClean = inputADifferencesDf.drop("cps_comparison_hash")
     assert(AClean.exceptAll(inputAResult).count() == 0)
 
-    // check that inputBDifferencesDf is the same as inputBResult
     val BClean = inputBDifferencesDf.drop("cps_comparison_hash")
     assert(BClean.exceptAll(inputBResult).count() == 0)
 
-    // check that metricsDf is not empty
     assert(metricsDf.count() > 0)
-    // check that AChangesToBDf is not empty
     assert(AChangesToBDf.count() > 0)
-    // check that BChangesToADf is not empty
     assert(BChangesToADf.count() > 0)
   }
 
   test("test that DatasetComparison generates the correct output files with --format CSV") {
-    val args = Array[String]("-o", testOutput, "--inputA", folder + "/namesA.parquet", "--inputB", folder + "/namesB.parquet", "--format", "csv")
+    val args = Array[String](
+      "-o", testOutput,
+      "--inputA", resourcesDir + "/namesA.parquet",
+      "--inputB", resourcesDir + "/namesB.parquet",
+      "--format", "csv"
+    )
     DatasetComparison.main(args)
-
 
     val inputADifferences = new File(testOutput + "/inputA_differences")
     val inputBDifferences = new File(testOutput + "/inputB_differences")
@@ -135,16 +145,12 @@ class DatasetComparisonTest extends AnyFunSuite with Matchers with BeforeAndAfte
     val inputBDifferencesDf = spark.read.option("header", "true").csv(inputBDifferences.getAbsolutePath)
     val metricsDf = spark.read.json(metricsJson.getAbsolutePath)
 
-    // check that inputADifferencesDf is the same as inputAResult
     val AClean = inputADifferencesDf.drop("cps_comparison_hash")
     assert(AClean.exceptAll(inputAResult).count() == 0)
 
-    // check that inputBDifferencesDf is the same as inputBResult
     val BClean = inputBDifferencesDf.drop("cps_comparison_hash")
     assert(BClean.exceptAll(inputBResult).count() == 0)
 
-    // check that metricsDf is not empty
     assert(metricsDf.count() > 0)
   }
-
 }

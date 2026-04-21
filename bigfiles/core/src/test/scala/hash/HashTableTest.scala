@@ -1,3 +1,5 @@
+package hash
+
 /**
  * Copyright 2020 ABSA Group Limited
  *
@@ -14,11 +16,11 @@
  * limitations under the License.
  **/
 
-import za.co.absa.Comparator
-import za.co.absa.hash.HashUtils
-import za.co.absa.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
+import testutil.SparkTestSession
+import za.co.absa.hash.HashUtils
+import za.co.absa.hash.HashUtils.HASH_COLUMN_NAME
 
 class HashTableTest extends AnyFunSuite{
   val spark: SparkSession = SparkTestSession.spark

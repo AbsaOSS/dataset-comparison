@@ -20,6 +20,9 @@ import sbtassembly.MergeStrategy
 
 import java.time.LocalDateTime
 
+enablePlugins(GitVersioning, GitBranchPrompt)
+enablePlugins(ScalafmtPlugin)
+
 lazy val scala212               = "2.12.20"
 lazy val scala211               = "2.11.12"
 lazy val supportedScalaVersions = List(scala211, scala212)
@@ -28,27 +31,32 @@ ThisBuild / version      := "0.1.0"
 ThisBuild / scalaVersion := scala212
 ThisBuild / organization := "za.co.absa"
 
-lazy val root = (project in file("."))
+// ── core module ───────────────────────────────────────────────────────────────
+// Pure comparison logic and data models. No CLI or I/O concerns.
+lazy val core = (project in file("core"))
   .enablePlugins(JacocoFilterPlugin)
-  .enablePlugins(GitVersioning, GitBranchPrompt)
-  .enablePlugins(ScalafmtPlugin)
+  .settings(
+    name               := "dataset-comparison-core",
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies ++= coreDependencies(scalaVersion.value),
+    javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
+    Test / fork          := true,
+    Test / baseDirectory := (ThisBuild / baseDirectory).value / "core"
+  )
+
+// ── cli module ────────────────────────────────────────────────────────────────
+// CLI entry point, argument parsing, I/O and serialization. Depends on core.
+lazy val cli = (project in file("cli"))
+  .enablePlugins(JacocoFilterPlugin)
+  .dependsOn(core)
   .settings(
     name                 := "dataset-comparison",
     crossScalaVersions   := supportedScalaVersions,
     assembly / mainClass := Some("za.co.absa.DatasetComparison"),
-    libraryDependencies ++= bigfilesDependencies ++ Seq(
-      "org.apache.spark" %% "spark-core"     % sparkVersionForScala(scalaVersion.value) % Provided,
-      "org.apache.spark" %% "spark-sql"      % sparkVersionForScala(scalaVersion.value) % Provided,
-      "org.json4s"       %% "json4s-native"  % jsonVersionForScala(scalaVersion.value),
-      "org.json4s"       %% "json4s-jackson" % jsonVersionForScala(scalaVersion.value),
-      "org.apache.hadoop" % "hadoop-common"  % hadoopVersionForScala(scalaVersion.value),
-      "org.apache.hadoop" % "hadoop-client"  % hadoopVersionForScala(scalaVersion.value),
-      "org.apache.hadoop" % "hadoop-hdfs"    % hadoopVersionForScala(scalaVersion.value),
-      "com.lihaoyi"      %% "upickle"        % unpickleVersionForScala(scalaVersion.value)
-    ),
+    libraryDependencies ++= cliDependencies(scalaVersion.value),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
     Test / fork          := true,
-    Test / baseDirectory := (ThisBuild / baseDirectory).value,
+    Test / baseDirectory := (ThisBuild / baseDirectory).value / "cli",
     packageOptions := Seq(
       ManifestAttributes(
         ("Built-By", System.getProperty("user.name")),
@@ -58,7 +66,14 @@ lazy val root = (project in file("."))
     )
   )
 
-ThisBuild / assemblyMergeStrategy := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-  case x                             => MergeStrategy.first
-}
+// ── root aggregate ────────────────────────────────────────────────────────────
+lazy val root = (project in file("."))
+  .enablePlugins(JacocoFilterPlugin)
+  .enablePlugins(GitVersioning, GitBranchPrompt)
+  .enablePlugins(ScalafmtPlugin)
+  .aggregate(core, cli)
+  .settings(
+    name := "dataset-comparison-root",
+    // Prevent root from being published or assembled
+    publish / skip := true
+  )

@@ -23,19 +23,47 @@ object RowByRowAnalysis {
 
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
+  /** Analyze comparison result and generate row-by-row differences if within threshold.
+    *
+    * @param diffA
+    *   DataFrame containing rows unique to dataset A
+    * @param diffB
+    *   DataFrame containing rows unique to dataset B
+    * @param threshold
+    *   Maximum number of differences to analyze per dataset
+    * @return
+    *   AnalysisResult indicating the outcome: Success with diffs, DatasetsIdentical, OneSidedDifference, or
+    *   ThresholdExceeded
+    */
+  def analyze(diffA: DataFrame, diffB: DataFrame, threshold: Int): AnalysisResult = {
+    val diffCountA = diffA.count()
+    val diffCountB = diffB.count()
+
+    if (diffCountA == 0 && diffCountB == 0) {
+      AnalysisResult.DatasetsIdentical
+    } else if (diffCountA == 0 || diffCountB == 0) {
+      AnalysisResult.OneSidedDifference(diffCountA, diffCountB)
+    } else if (diffCountA > threshold || diffCountB > threshold) {
+      AnalysisResult.ThresholdExceeded(diffCountA, diffCountB, threshold)
+    } else {
+      val diffAResult = generateDiffJson(diffA, diffB, "A")
+      val diffBResult = generateDiffJson(diffB, diffA, "B")
+      AnalysisResult.Success(diffAResult, diffBResult)
+    }
+  }
+
   /** Recursively finds the best matching row in diffRight for the given rowLeft based on the minimum difference score.
     *
     * @param rowLeft
-    *   The row from DataFrame Left to compare.
+    *   The row from the left DataFrame to compare
     * @param diffRight
-    *   The DataFrame Right to compare against.
+    *   The right DataFrame to compare against
     * @param bestScore
-    *   score of difference between two rows, starts on row length +1
+    *   The best score found so far (lower is better)
     * @param mask
-    *   it is a sequence of 0 and 1, where 0 means no difference and 1 means difference. Then you can pick just
-    *   different rows on behalf of this mask.
+    *   The mask indicating which columns differ in the best match
     * @param bestRowRight
-    *   represents the best row from Right DataFrame that is the closest to the row from Left DataFrame.
+    *   The best matching row found so far
     * @return
     *   best match statistics. This contains the best score, the best row from DataFrame Right and mask which has 0 and
     *   1, 1 means the column is different. Mask represents the comparison between two rows where 0 means they are the
