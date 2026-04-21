@@ -12,14 +12,14 @@ This is scala implementation of the project. It is used for comparing big files 
 
 The project is split into two SBT submodules:
 
-| Module | Purpose |
-|--------|---------|
-| `api`  | Pure comparison logic and data models: `Comparator`, `DatasetComparisonHelper`, `HashUtils`, all `analysis/*` classes. No CLI or I/O dependencies. |
-| `app`  | CLI entry point, I/O, serialization: `DatasetComparison`, `MetricsSerializer`, `IOHandler`, `ArgsParser`, `Arguments`, `DiffComputeType`, `OutputFormatType`. Depends on `api`. |
+| Module  | Purpose |
+|---------|---------|
+| `core`  | Pure comparison logic and data models: `Comparator`, `DatasetComparisonHelper`, `HashUtils`, all `analysis/*` classes. No CLI or I/O dependencies. |
+| `cli`   | CLI entry point, I/O, serialization: `DatasetComparison`, `MetricsSerializer`, `IOHandler`, `ArgsParser`, `Arguments`, `DiffComputeType`, `OutputFormatType`. Depends on `core`. |
 
 ```
 bigfiles/
-├── api/
+├── core/
 │   ├── src/main/scala/za/co/absa/
 │   │   ├── analysis/          # AnalyseStat, AnalysisResult, ColumnsDiff, RowsDiff,
 │   │   │                      #   ComparisonMetrics, ComparisonMetricsCalculator, RowByRowAnalysis
@@ -29,7 +29,7 @@ bigfiles/
 │   └── src/test/scala/        # ComparatorTest, ComparisonMetricsCalculatorTest,
 │                              #   DatasetComparisonHelperTest, HashTableTest,
 │                              #   RowByRowAnalysesTest, AnalysisResultTest, SparkTestSession
-├── app/
+├── cli/
 │   ├── src/main/scala/za/co/absa/
 │   │   ├── io/IOHandler.scala
 │   │   ├── parser/            # ArgsParser, Arguments, DiffComputeType, OutputFormatType
@@ -38,28 +38,28 @@ bigfiles/
 │   ├── src/main/resources/application.conf
 │   └── src/test/scala/        # DatasetComparisonTest, ArgsParserTest, IOHandlerTest,
 │                              #   MetricsSerializerTest, VersionTest, SparkTestSession
-├── testdata/                  # Shared test resources (symlinked into api & app test resources)
+├── testdata/                  # Shared test resources (symlinked into core & cli test resources)
 │   ├── namesA.parquet
 │   ├── namesB.parquet
 │   ├── inputA.txt
 │   ├── inputB.txt
 │   └── out.txt
 └── project/
-    └── Dependencies.scala     # apiDependencies and appDependencies groups
+    └── Dependencies.scala     # coreDependencies and cliDependencies groups
 ```
 
 ## How to run
 
-First run assembly from the `app` module:
+First run assembly from the `cli` module:
 
 ```bash
-sbt app/assembly
+sbt cli/assembly
 ```
 
 Then run:
 
 ```bash
-spark-submit app/target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>
+spark-submit cli/target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path>
 ```
 
 ### Parameters:
@@ -75,8 +75,8 @@ spark-submit app/target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <outpu
 Example:
 ```bash
 spark-submit --class za.co.absa.DatasetComparison \
-  --conf "spark.driver.extraJavaOptions=-Dconfig.file=/../bigfiles/app/src/main/resources/application.conf" \
-  app/target/scala-2.12/dataset-comparison-assembly-1.0.jar \
+  --conf "spark.driver.extraJavaOptions=-Dconfig.file=/../bigfiles/cli/src/main/resources/application.conf" \
+  cli/target/scala-2.12/dataset-comparison-assembly-1.0.jar \
   -o "/test_files/output_names$(date '+%Y-%m-%d_%H%M%S')" \
   --inputA /test_files/namesA.parquet \
   --inputB /test_files/namesB.parquet \
@@ -88,12 +88,12 @@ spark-submit --class za.co.absa.DatasetComparison \
 ```bash
 spark-submit --class za.co.absa.DatasetComparison \
   --conf "spark.driver.extraJavaOptions=-Dconfig.file=/path/to/application.conf" \
-  app/target/scala-2.12/dataset-comparison-assembly-1.0.jar \
+  cli/target/scala-2.12/dataset-comparison-assembly-1.0.jar \
   -o <output-path> --inputA <A-file-path> --inputB <B-file-path> -d Row
 ```
 
 `-d Row` is optional parameter for detailed analyses that specifies which analyses to use. Now it can be only `Row`.
-It will compute detailed analyses if number of different columns is less than 200, you can change this threshold in `app/src/main/resources/application.conf`.
+It will compute detailed analyses if number of different columns is less than 200, you can change this threshold in `cli/src/main/resources/application.conf`.
 
 ### Spark configuration
 you can set spark configuration in `spark-defaults.conf` file it is stored in `$SPARK_HOME/conf` directory
@@ -138,16 +138,16 @@ sdk env install
 
 Tests are split between the two modules. Use the following commands:
 
-| sbt command      | Module | Test files |
-|------------------|--------|------------|
-| `sbt api/test`   | api    | ComparatorTest, ComparisonMetricsCalculatorTest, DatasetComparisonHelperTest, HashTableTest, RowByRowAnalysesTest, AnalysisResultTest |
-| `sbt app/test`   | app    | DatasetComparisonTest, ArgsParserTest, IOHandlerTest, MetricsSerializerTest, VersionTest |
-| `sbt test`       | both   | Runs all tests across both modules (root aggregate) |
+| sbt command        | Module | Test files |
+|--------------------|--------|------------|
+| `sbt core/test`    | core   | ComparatorTest, ComparisonMetricsCalculatorTest, DatasetComparisonHelperTest, HashTableTest, RowByRowAnalysesTest, AnalysisResultTest |
+| `sbt cli/test`     | cli    | DatasetComparisonTest, ArgsParserTest, IOHandlerTest, MetricsSerializerTest, VersionTest |
+| `sbt test`         | both   | Runs all tests across both modules (root aggregate) |
 | `sbt jacoco` | Jacoco code coverage | Runs all possible tests with code coverage - i.e. you need environment setup for all previous unit/integration tests |
 
-`SparkTestSession` is duplicated into both `api/src/test/scala/` and `app/src/test/scala/` as it is required by tests in both modules.
+`SparkTestSession` is duplicated into both `core/src/test/scala/` and `cli/src/test/scala/` as it is required by tests in both modules.
 
-Test resources (`namesA.parquet`, `namesB.parquet`, `inputA.txt`, `inputB.txt`, `out.txt`) live in `testdata/` at the root and are symlinked into `api/src/test/resources/` and `app/src/test/resources/`.
+Test resources (`namesA.parquet`, `namesB.parquet`, `inputA.txt`, `inputB.txt`, `out.txt`) live in `testdata/` at the root and are symlinked into `core/src/test/resources/` and `cli/src/test/resources/`.
 
 ---------
 
@@ -244,12 +244,12 @@ And you have to set remote login on:
 
 running with hadoop:
 ```bash
-sbt app/assembly
-spark-submit app/target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path> --fsURI http://localhost:9999/ 
+sbt cli/assembly
+spark-submit cli/target/scala-2.12/dataset-comparison-assembly-1.0.jar -o <output-path> --inputA <A-file-path> --inputB <B-file-path> --fsURI http://localhost:9999/ 
 ```
-`spark-submit app/target/scala-2.12/dataset-comparison-assembly-1.0.jar -o /test_files/output --inputA /test_files/RUN20_edit.parquet --inputB /test_files/RUN20.parquet --fsURI hdfs://localhost:9999/`
+`spark-submit cli/target/scala-2.12/dataset-comparison-assembly-1.0.jar -o /test_files/output --inputA /test_files/RUN20_edit.parquet --inputB /test_files/RUN20.parquet --fsURI hdfs://localhost:9999/`
 or you can uncomment code at the start of validate part in ArgsParserTest and change
-FS to HDFS_URI and then run `sbt app/test`
+FS to HDFS_URI and then run `sbt cli/test`
 
 ### Setting up IntelliJ IDEA
 

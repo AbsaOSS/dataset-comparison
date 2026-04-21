@@ -69,8 +69,8 @@ object Dependencies {
     }
   }
 
-  /** Dependencies for the api module — pure comparison logic, no CLI concerns. */
-  def apiDependencies(scalaVersion: String): Seq[ModuleID] = {
+  /** Dependencies for the core module — pure comparison logic, no CLI concerns. */
+  def coreDependencies(scalaVersion: String): Seq[ModuleID] = {
     lazy val slf4jApi  = "org.slf4j"      % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
     // Required for scala 2.11 + spark 2.4.7
@@ -91,8 +91,8 @@ object Dependencies {
     )
   }
 
-  /** Dependencies for the app module — CLI, I/O and serialization layer. */
-  def appDependencies(scalaVersion: String): Seq[ModuleID] = {
+  /** Dependencies for the cli module — CLI, I/O and serialization layer. */
+  def cliDependencies(scalaVersion: String): Seq[ModuleID] = {
     lazy val fansi     = "com.lihaoyi"      %% "fansi"     % Versions.fansi
     lazy val scopt     = "com.github.scopt" %% "scopt"     % Versions.scopt
     lazy val slf4jApi  = "org.slf4j"         % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")

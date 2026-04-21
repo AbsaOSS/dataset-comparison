@@ -31,32 +31,32 @@ ThisBuild / version      := "0.1.0"
 ThisBuild / scalaVersion := scala212
 ThisBuild / organization := "za.co.absa"
 
-// ── api module ────────────────────────────────────────────────────────────────
+// ── core module ───────────────────────────────────────────────────────────────
 // Pure comparison logic and data models. No CLI or I/O concerns.
-lazy val api = (project in file("api"))
+lazy val core = (project in file("core"))
   .enablePlugins(JacocoFilterPlugin)
   .settings(
-    name               := "dataset-comparison-api",
+    name               := "dataset-comparison-core",
     crossScalaVersions := supportedScalaVersions,
-    libraryDependencies ++= apiDependencies(scalaVersion.value),
+    libraryDependencies ++= coreDependencies(scalaVersion.value),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
     Test / fork          := true,
-    Test / baseDirectory := (ThisBuild / baseDirectory).value / "api"
+    Test / baseDirectory := (ThisBuild / baseDirectory).value / "core"
   )
 
-// ── app module ────────────────────────────────────────────────────────────────
-// CLI entry point, argument parsing, I/O and serialization. Depends on api.
-lazy val app = (project in file("app"))
+// ── cli module ────────────────────────────────────────────────────────────────
+// CLI entry point, argument parsing, I/O and serialization. Depends on core.
+lazy val cli = (project in file("cli"))
   .enablePlugins(JacocoFilterPlugin)
-  .dependsOn(api)
+  .dependsOn(core)
   .settings(
     name                 := "dataset-comparison",
     crossScalaVersions   := supportedScalaVersions,
     assembly / mainClass := Some("za.co.absa.DatasetComparison"),
-    libraryDependencies ++= appDependencies(scalaVersion.value),
+    libraryDependencies ++= cliDependencies(scalaVersion.value),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
     Test / fork          := true,
-    Test / baseDirectory := (ThisBuild / baseDirectory).value / "app",
+    Test / baseDirectory := (ThisBuild / baseDirectory).value / "cli",
     packageOptions := Seq(
       ManifestAttributes(
         ("Built-By", System.getProperty("user.name")),
@@ -71,7 +71,7 @@ lazy val root = (project in file("."))
   .enablePlugins(JacocoFilterPlugin)
   .enablePlugins(GitVersioning, GitBranchPrompt)
   .enablePlugins(ScalafmtPlugin)
-  .aggregate(api, app)
+  .aggregate(core, cli)
   .settings(
     name := "dataset-comparison-root",
     // Prevent root from being published or assembled
