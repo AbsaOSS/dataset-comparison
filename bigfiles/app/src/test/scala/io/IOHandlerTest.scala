@@ -1,3 +1,5 @@
+package io
+
 /**
  * Copyright 2020 ABSA Group Limited
  *
@@ -14,16 +16,17 @@
  * limitations under the License.
  **/
 
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.json4s.JsonDSL._
+import org.json4s.native.JsonMethods.{compact, render}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
+import testutils.SparkTestSession
+import upickle.default._
 import za.co.absa.analysis.{ColumnsDiff, RowsDiff}
 import za.co.absa.io.IOHandler
 import za.co.absa.parser.OutputFormatType
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-import org.json4s.native.JsonMethods.{compact, render}
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers
-import org.json4s.JsonDSL._
-import upickle.default._
 
 import java.io.File
 import java.nio.file.{Files, Paths}

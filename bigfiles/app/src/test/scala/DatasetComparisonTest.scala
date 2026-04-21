@@ -19,6 +19,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import testutils.SparkTestSession
 
 import java.io.File
 import java.nio.file.Files

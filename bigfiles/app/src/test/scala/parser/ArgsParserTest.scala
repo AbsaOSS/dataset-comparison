@@ -1,3 +1,5 @@
+package parser
+
 /**
  * Copyright 2020 ABSA Group Limited
  *
@@ -14,17 +16,17 @@
  * limitations under the License.
  **/
 
-import za.co.absa.parser.{ArgsParser, Arguments, DiffComputeType, OutputFormatType}
 import org.apache.spark.sql.SparkSession
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
+import testutils.SparkTestSession
+import za.co.absa.parser.{ArgsParser, Arguments, DiffComputeType, OutputFormatType}
 
 import java.io.File
 
 class ArgsParserTest extends AnyFunSuite with BeforeAndAfterAll {
 
   implicit val spark: SparkSession = SparkTestSession.spark
-  import spark.implicits._
 
   val resourcesDir: String = new File(getClass.getResource("/inputA.txt").toURI).getParent
 

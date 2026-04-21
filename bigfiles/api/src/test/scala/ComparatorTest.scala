@@ -17,6 +17,7 @@
 import za.co.absa.Comparator
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
+import testutil.SparkTestSession
 
 class ComparatorTest extends AnyFunSuite {
   implicit val spark: SparkSession = SparkTestSession.spark

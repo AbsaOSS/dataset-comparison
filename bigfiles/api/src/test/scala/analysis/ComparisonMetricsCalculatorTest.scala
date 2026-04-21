@@ -1,3 +1,5 @@
+package analysis
+
 /**
  * Copyright 2020 ABSA Group Limited
  *
@@ -16,7 +18,8 @@
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
-import za.co.absa.analysis.{ComparisonMetrics, ComparisonMetricsCalculator}
+import testutil.SparkTestSession
+import za.co.absa.analysis.ComparisonMetricsCalculator
 
 class ComparisonMetricsCalculatorTest extends AnyFunSuite {
   implicit val spark: SparkSession = SparkTestSession.spark

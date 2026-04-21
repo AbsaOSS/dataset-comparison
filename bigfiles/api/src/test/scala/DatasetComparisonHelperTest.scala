@@ -17,6 +17,7 @@
 import za.co.absa.DatasetComparisonHelper
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
+import testutil.SparkTestSession
 
 class DatasetComparisonHelperTest extends AnyFunSuite {
   implicit val spark: SparkSession = SparkTestSession.spark

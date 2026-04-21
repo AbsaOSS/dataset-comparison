@@ -19,6 +19,7 @@ import za.co.absa.analysis.RowByRowAnalysis.generateDiffJson
 import za.co.absa.hash.HashUtils.HASH_COLUMN_NAME
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
+import testutil.SparkTestSession
 import upickle.default._
 
 
