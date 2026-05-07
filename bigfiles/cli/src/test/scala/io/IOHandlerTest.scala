@@ -1,3 +1,5 @@
+package io
+
 /**
  * Copyright 2020 ABSA Group Limited
  *
@@ -14,19 +16,20 @@
  * limitations under the License.
  **/
 
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.json4s.JsonDSL._
+import org.json4s.native.JsonMethods.{compact, render}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
+import testutils.SparkTestSession
+import upickle.default._
 import za.co.absa.analysis.{ColumnsDiff, RowsDiff}
 import za.co.absa.io.IOHandler
 import za.co.absa.parser.OutputFormatType
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-import org.json4s.native.JsonMethods.{compact, render}
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers
-import org.json4s.JsonDSL._
-import upickle.default._
 
 import java.io.File
-import java.nio.file.Paths
+import java.nio.file.{Files, Paths}
 import scala.io.Source
 import scala.reflect.io.Directory
 
@@ -35,16 +38,18 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
   implicit val spark: SparkSession = SparkTestSession.spark
 
   import spark.implicits._
-  val folder = "testoutput"
-  val filePath: String = folder + "/sample.parquet"
-  val filePathCsv: String = folder + "/sample.csv"
-  val jsonPath: String = folder +"/sample.json"
+  var tempDir: File = _
 
+  before {
+    tempDir = Files.createTempDirectory("iohandler-test").toFile
+  }
+
+  def filePath: String    = tempDir.getAbsolutePath + "/sample.parquet"
+  def filePathCsv: String = tempDir.getAbsolutePath + "/sample.csv"
+  def jsonPath: String    = tempDir.getAbsolutePath + "/sample.json"
 
   after {
-    // Clean up
-    val dir = new Directory(new File("src/test/resources/" + folder))
-    dir.deleteRecursively()
+    new Directory(tempDir).deleteRecursively()
   }
 
   test("test that sparkRead reads a Parquet file into a DataFrame") {
@@ -138,11 +143,6 @@ class IOHandlerTest extends AnyFunSuite with Matchers with BeforeAndAfterAll wit
         )
       )
     )
-
-    val dir = new File(folder)
-    if (!dir.exists()) {
-      dir.mkdirs()
-    }
 
     IOHandler.rowDiffWriteAsJson(Paths.get(jsonPath).toString, data)
 

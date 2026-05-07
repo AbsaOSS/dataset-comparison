@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+package testutil
+
 import org.apache.spark.sql.SparkSession
 
 import java.io.File

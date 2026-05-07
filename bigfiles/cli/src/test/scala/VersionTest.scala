@@ -17,6 +17,7 @@
 import org.apache.spark._
 import org.apache.spark.sql.SparkSession
 import org.scalatest.funsuite.AnyFunSuite
+import testutils.SparkTestSession
 
 class VersionTest extends AnyFunSuite {
   test("test spark version") {

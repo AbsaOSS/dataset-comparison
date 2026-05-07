@@ -69,26 +69,54 @@ object Dependencies {
     }
   }
 
-  def bigfilesDependencies: Seq[ModuleID] = {
-    lazy val fansi    = "com.lihaoyi"      %% "fansi"     % Versions.fansi
-    lazy val scopt    = "com.github.scopt" %% "scopt"     % Versions.scopt
-    lazy val slf4jApi = "org.slf4j"         % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
-    lazy val config   = "com.typesafe"      % "config"    % Versions.config
-
+  /** Dependencies for the core module — pure comparison logic, no CLI concerns. */
+  def coreDependencies(scalaVersion: String): Seq[ModuleID] = {
+    lazy val slf4jApi  = "org.slf4j"      % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
     lazy val scalatest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
-
     // Required for scala 2.11 + spark 2.4.7
     lazy val snappy  = "org.xerial.snappy"             % "snappy-java"          % "1.1.8.4"
     lazy val jackson = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Versions.jackson211_212 % Provided
 
     Seq(
+      "org.apache.spark" %% "spark-core"    % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.spark" %% "spark-sql"     % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.hadoop" % "hadoop-common" % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-client" % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-hdfs"   % hadoopVersionForScala(scalaVersion),
+      "com.lihaoyi"      %% "upickle"       % unpickleVersionForScala(scalaVersion),
+      slf4jApi,
       scalatest,
+      snappy,
+      jackson
+    )
+  }
+
+  /** Dependencies for the cli module — CLI, I/O and serialization layer. */
+  def cliDependencies(scalaVersion: String): Seq[ModuleID] = {
+    lazy val fansi     = "com.lihaoyi"      %% "fansi"     % Versions.fansi
+    lazy val scopt     = "com.github.scopt" %% "scopt"     % Versions.scopt
+    lazy val slf4jApi  = "org.slf4j"         % "slf4j-api" % Versions.slf4jApi exclude ("log4j", "log4j")
+    lazy val config    = "com.typesafe"      % "config"    % Versions.config
+    lazy val scalatest = "org.scalatest"    %% "scalatest" % Versions.scalatest % Test
+    // Required for scala 2.11 + spark 2.4.7
+    lazy val snappy  = "org.xerial.snappy"             % "snappy-java"          % "1.1.8.4"
+    lazy val jackson = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Versions.jackson211_212 % Provided
+
+    Seq(
+      "org.apache.spark" %% "spark-core"     % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.spark" %% "spark-sql"      % sparkVersionForScala(scalaVersion) % Provided,
+      "org.apache.hadoop" % "hadoop-common"  % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-client"  % hadoopVersionForScala(scalaVersion),
+      "org.apache.hadoop" % "hadoop-hdfs"    % hadoopVersionForScala(scalaVersion),
+      "org.json4s"       %% "json4s-native"  % jsonVersionForScala(scalaVersion),
+      "org.json4s"       %% "json4s-jackson" % jsonVersionForScala(scalaVersion),
       fansi,
       scopt,
       slf4jApi,
       config,
-      jackson,
-      snappy
+      scalatest,
+      snappy,
+      jackson
     )
   }
 }
